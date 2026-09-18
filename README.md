@@ -1,5 +1,5 @@
 # mmedina-tplp3-2026
-#Diagrama Mermaid
+```mermaid
 classDiagram
     %% Clase Base
     class Arma {
@@ -66,4 +66,4 @@ classDiagram
     Arrojadiza <|-- Flash
     Arrojadiza <|-- Granada
     Arrojadiza <|-- Humo
-    ```
+```
