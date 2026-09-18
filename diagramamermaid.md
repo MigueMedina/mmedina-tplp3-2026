@@ -1,4 +1,4 @@
-```mermaid:
+```mermaid: 
 classDiagram
     %% Clase Base
     class Arma {
