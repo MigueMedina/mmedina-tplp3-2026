@@ -65,4 +65,4 @@ classDiagram
     Arrojadiza <|-- Flash
     Arrojadiza <|-- Granada
     Arrojadiza <|-- Humo
-    ```mermaid
+    ```
