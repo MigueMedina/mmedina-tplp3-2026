@@ -1,4 +1,4 @@
-```mermaid: 
+```mermaid
 classDiagram
     %% Clase Base
     class Arma {
@@ -65,4 +65,4 @@ classDiagram
     Arrojadiza <|-- Flash
     Arrojadiza <|-- Granada
     Arrojadiza <|-- Humo
-    ```
+```
