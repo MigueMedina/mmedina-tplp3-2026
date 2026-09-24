@@ -1,4 +1,4 @@
-package py.edu.uc.lp3.herencia;
+package py.edu.uc.lp3.mm.cs2;
 
 public class Escopeta extends ArmaDeFuego {
     private int perdigon;
