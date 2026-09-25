@@ -20,4 +20,9 @@ public abstract class Arma {
 
     public double getPrecio() { return precio; }
     public void setPrecio(double precio) { this.precio = precio; }
+
+    // Métodos abstractos
+    public abstract String disparar();
+    public abstract String recargar();
+    public abstract String obtenerDetalleTienda();
 }

@@ -5,13 +5,18 @@ public abstract class ArmaDeFuego extends Arma {
     private int precision;
     private double recarga;
     private double velocidad;
+    private int municionActual;
+    private int capacidadCargador;
 
-    public ArmaDeFuego(String nombre, int id, double precio, int dano, int precision, double recarga, double velocidad) {
+    public ArmaDeFuego(String nombre, int id, double precio, int dano, int precision, double recarga, double velocidad,
+                       int capacidadCargador) {
         super(nombre, id, precio);
         this.dano = dano;
         this.precision = precision;
         this.recarga = recarga;
         this.velocidad = velocidad;
+        this.capacidadCargador = capacidadCargador;
+        this.municionActual = capacidadCargador;
     }
 
     // Getters y Setters
@@ -26,4 +31,16 @@ public abstract class ArmaDeFuego extends Arma {
 
     public double getVelocidad() { return velocidad; }
     public void setVelocidad(double velocidad) { this.velocidad = velocidad; }
+
+    public int getMunicionActual() { return municionActual; }
+    public void setMunicionActual(int municionActual) { this.municionActual = municionActual; }
+
+    public int getCapacidadCargador() { return capacidadCargador; }
+    public void setCapacidadCargador(int capacidadCargador) { this.capacidadCargador = capacidadCargador; }
+
+    @Override
+    public String recargar() {
+        this.municionActual = this.capacidadCargador;
+        return "Munición recargada a " + this.municionActual + " balas";
+    }
 }

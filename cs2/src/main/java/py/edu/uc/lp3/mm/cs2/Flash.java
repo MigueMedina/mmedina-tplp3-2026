@@ -5,8 +5,8 @@ public class Flash extends Arrojadiza {
     private double duracionCeguera;
 
     public Flash(String nombre, int id, double precio, String tipo, double radio, double distancia, double duracion,
-                 int intensidad, double duracionCeguera) {
-        super(nombre, id, precio, tipo, radio, distancia, duracion);
+                 double cooldown, int intensidad, double duracionCeguera) {
+        super(nombre, id, precio, tipo, radio, distancia, duracion, cooldown);
         this.intensidad = intensidad;
         this.duracionCeguera = duracionCeguera;
     }
@@ -17,4 +17,14 @@ public class Flash extends Arrojadiza {
 
     public double getDuracionCeguera() { return duracionCeguera; }
     public void setDuracionCeguera(double duracionCeguera) { this.duracionCeguera = duracionCeguera; }
+
+    @Override
+    public String disparar() {
+        return "¡Flash! La granada " + getNombre() + " ciega con intensidad " + intensidad;
+    }
+
+    @Override
+    public String obtenerDetalleTienda() {
+        return "Flash: " + getNombre() + " | Intensidad: " + intensidad + " | Precio: $" + getPrecio();
+    }
 }

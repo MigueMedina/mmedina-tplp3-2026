@@ -5,8 +5,8 @@ public class Pistola extends ArmaDeFuego {
     private boolean silenciador;
 
     public Pistola(String nombre, int id, double precio, int dano, int precision, double recarga, double velocidad,
-                   boolean automatica, boolean silenciador) {
-        super(nombre, id, precio, dano, precision, recarga, velocidad);
+                   int capacidadCargador, boolean automatica, boolean silenciador) {
+        super(nombre, id, precio, dano, precision, recarga, velocidad, capacidadCargador);
         this.automatica = automatica;
         this.silenciador = silenciador;
     }
@@ -17,4 +17,14 @@ public class Pistola extends ArmaDeFuego {
 
     public boolean isSilenciador() { return silenciador; }
     public void setSilenciador(boolean silenciador) { this.silenciador = silenciador; }
+
+    @Override
+    public String disparar() {
+        return "¡Pum! Disparo de la pistola " + getNombre();
+    }
+
+    @Override
+    public String obtenerDetalleTienda() {
+        return "Pistola: " + getNombre() + " | Daño: " + getDano() + " | Precio: $" + getPrecio();
+    }
 }

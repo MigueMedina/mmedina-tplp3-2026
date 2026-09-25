@@ -7,8 +7,8 @@ public class Fusil extends ArmaDeFuego {
     private boolean silenciador;
 
     public Fusil(String nombre, int id, double precio, int dano, int precision, double recarga, double velocidad,
-                 boolean automatica, int mira, int retroceso, boolean silenciador) {
-        super(nombre, id, precio, dano, precision, recarga, velocidad);
+                 int capacidadCargador, boolean automatica, int mira, int retroceso, boolean silenciador) {
+        super(nombre, id, precio, dano, precision, recarga, velocidad, capacidadCargador);
         this.automatica = automatica;
         this.mira = mira;
         this.retroceso = retroceso;
@@ -27,4 +27,14 @@ public class Fusil extends ArmaDeFuego {
 
     public boolean isSilenciador() { return silenciador; }
     public void setSilenciador(boolean silenciador) { this.silenciador = silenciador; }
+
+    @Override
+    public String disparar() {
+        return "¡Bang! Ráfaga del fusil " + getNombre() + " (retroceso " + retroceso + ")";
+    }
+
+    @Override
+    public String obtenerDetalleTienda() {
+        return "Fusil: " + getNombre() + " | Daño: " + getDano() + " | Precio: $" + getPrecio();
+    }
 }
