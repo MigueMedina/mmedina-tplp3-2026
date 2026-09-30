@@ -4,56 +4,65 @@
 classDiagram
     %% Clase Base
     class Arma {
-        +String Nombre
-        +Int ID
-        +Float Precio
+        <<abstract>>
+        -String nombre
+        -int id
+        -double precio
+        +disparar()*
+        +recargar()* String
+        +obtenerDetalleTienda()* String
     }
 
     %% Clases Intermedias (Heredan de Arma)
     class ArmaDeFuego {
-        +Int Daño
-        +Int Precision
-        +Float Recarga
-        +Float Velocidad
+        -int dano
+        -int precision
+        -double recarga
+        -double velocidad
+        -int municionActual
+        -int capacidadCargador
+        +recargar() String
     }
 
     class Arrojadiza {
-        +String Tipo
-        +Float Radio
-        +Float Distancia
-        +Float Duracion
+        -String tipo
+        -double radio
+        -double distancia
+        -double duracion
+        -double cooldown
+        +recargar() String
     }
 
     %% Clases Finales (Heredan de las Intermedias)
     class Fusil {
-        +Boolean Automática
-        +Int Mira
-        +Int Retroceso
-        +Boolean Silenciador
+        -boolean automatica
+        -int mira
+        -int retroceso
+        -boolean silenciador
     }
 
     class Pistola {
-        +Boolean Automática
-        +Boolean Silenciador
+        -boolean automatica
+        -boolean silenciador
     }
 
     class Escopeta {
-        +Int Perdigón
-        +Float Dispersión
+        -int perdigon
+        -double dispersion
     }
 
     class Flash {
-        +Int Intensidad
-        +Float DuraciónCeguera
+        -int intensidad
+        -double duracionCeguera
     }
 
     class Granada {
-        +Int Daño
-        +Boolean Aturdimiento
+        -int dano
+        -boolean aturdimiento
     }
 
     class Humo {
-        +Int Duración
+        -int duracion
     }
 
     %% Relaciones de Herencia
