@@ -1,10 +1,14 @@
-package py.edu.uc.lp3.mm.cs2;
+package py.edu.uc.lp3.mm.cs2.rest.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import py.edu.uc.lp3.mm.cs2.Arma;
+import py.edu.uc.lp3.mm.cs2.constants.ApiPaths;
+import py.edu.uc.lp3.mm.cs2.domain.Arma;
+import py.edu.uc.lp3.mm.cs2.domain.Flash;
+import py.edu.uc.lp3.mm.cs2.domain.Fusil;
+import py.edu.uc.lp3.mm.cs2.domain.Pistola;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +16,7 @@ import java.util.Map;
 @RestController
 public class ArmaController {
 
-	@GetMapping("/arma")
+	@GetMapping(ApiPaths.ARMA)
 	public Arma crearArma(
 			@RequestParam(defaultValue = "pistola") String tipo,
 			@RequestParam String nombre,
@@ -48,7 +52,7 @@ public class ArmaController {
 		return arma;
 	}
 
-	@GetMapping("/arma/accion")
+	@GetMapping(ApiPaths.ARMA_ACCION)
 	public Map<String, Object> accionArma(
 			@RequestParam(defaultValue = "pistola") String tipo,
 			@RequestParam String nombre,
