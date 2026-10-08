@@ -112,5 +112,5 @@ La **sobreescritura** (`@Override`) permite redefinir en las clases hijas métod
 ---
 
 ## Enlace al Commit de la Solución
-* **Commit:** `https://github.com/MigueMedina/mmedina-tplp3-2026/commit/b2766a8`
+* **Commit:** `https://github.com/MigueMedina/mmedina-tplp3-2026/commit/5417c55`
 ```
