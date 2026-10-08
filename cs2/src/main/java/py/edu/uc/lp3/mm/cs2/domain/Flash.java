@@ -4,6 +4,18 @@ public class Flash extends Arrojadiza {
     private int intensidad;
     private double duracionCeguera;
 
+    public Flash() {
+        super("", 0, 0, "", 0, 0, 0, 0);
+        this.intensidad = 0;
+        this.duracionCeguera = 0;
+    }
+
+    public Flash(String nombre, int id, double precio) {
+        super(nombre, id, precio, "", 0, 0, 0, 0);
+        this.intensidad = 0;
+        this.duracionCeguera = 0;
+    }
+
     public Flash(String nombre, int id, double precio, String tipo, double radio, double distancia, double duracion,
                  double cooldown, int intensidad, double duracionCeguera) {
         super(nombre, id, precio, tipo, radio, distancia, duracion, cooldown);

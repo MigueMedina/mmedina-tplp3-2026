@@ -6,6 +6,22 @@ public class Fusil extends ArmaDeFuego {
     private int retroceso;
     private boolean silenciador;
 
+    public Fusil() {
+        super("", 0, 0, 0, 0, 0, 0, 0);
+        this.automatica = false;
+        this.mira = 0;
+        this.retroceso = 0;
+        this.silenciador = false;
+    }
+
+    public Fusil(String nombre, int id, double precio) {
+        super(nombre, id, precio, 0, 0, 0, 0, 0);
+        this.automatica = false;
+        this.mira = 0;
+        this.retroceso = 0;
+        this.silenciador = false;
+    }
+
     public Fusil(String nombre, int id, double precio, int dano, int precision, double recarga, double velocidad,
                  int capacidadCargador, boolean automatica, int mira, int retroceso, boolean silenciador) {
         super(nombre, id, precio, dano, precision, recarga, velocidad, capacidadCargador);
