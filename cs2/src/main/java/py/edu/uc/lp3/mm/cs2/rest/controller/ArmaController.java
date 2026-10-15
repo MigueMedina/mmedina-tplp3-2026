@@ -5,9 +5,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import py.edu.uc.lp3.mm.cs2.constants.ApiPaths;
+import py.edu.uc.lp3.mm.cs2.domain.AWP;
 import py.edu.uc.lp3.mm.cs2.domain.Arma;
 import py.edu.uc.lp3.mm.cs2.domain.Flash;
 import py.edu.uc.lp3.mm.cs2.domain.Fusil;
+import py.edu.uc.lp3.mm.cs2.domain.Granada;
 import py.edu.uc.lp3.mm.cs2.domain.Pistola;
 
 import java.util.HashMap;
@@ -39,6 +41,13 @@ public class ArmaController {
 			case "fusil":
 				arma = new Fusil(nombre, id, precio, dano, precision, recarga, velocidad, capacidadCargador,
 						automatica, mira, retroceso, silenciador);
+				break;
+			case "awp":
+				arma = new AWP(nombre, id, precio, dano, precision, recarga, velocidad, capacidadCargador,
+						mira, retroceso, silenciador);
+				break;
+			case "granada":
+				arma = new Granada(nombre, id, precio, "granada", radio, 0, 0, 0, dano, automatica);
 				break;
 			case "flash":
 				arma = new Flash(nombre, id, precio, "flash", radio, 0, 0, 0, intensidad, duracionCeguera);
@@ -75,6 +84,13 @@ public class ArmaController {
 			case "fusil":
 				arma = new Fusil(nombre, id, precio, dano, precision, recarga, velocidad, capacidadCargador,
 						automatica, mira, retroceso, silenciador);
+				break;
+			case "awp":
+				arma = new AWP(nombre, id, precio, dano, precision, recarga, velocidad, capacidadCargador,
+						mira, retroceso, silenciador);
+				break;
+			case "granada":
+				arma = new Granada(nombre, id, precio, "granada", radio, 0, 0, 0, dano, automatica);
 				break;
 			case "flash":
 				arma = new Flash(nombre, id, precio, "flash", radio, 0, 0, 0, intensidad, duracionCeguera);

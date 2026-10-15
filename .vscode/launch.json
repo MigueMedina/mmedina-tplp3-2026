@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-Cs2Application<cs2>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "py.edu.uc.lp3.mm.cs2.Cs2Application",
+            "projectName": "cs2",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

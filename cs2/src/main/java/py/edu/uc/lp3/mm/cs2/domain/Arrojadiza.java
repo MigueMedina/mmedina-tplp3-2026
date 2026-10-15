@@ -33,6 +33,11 @@ public abstract class Arrojadiza extends Arma {
     public double getCooldown() { return cooldown; }
     public void setCooldown(double cooldown) { this.cooldown = cooldown; }
 
+    // UICapable: la distancia a la que se arroja representa su rango
+    public double getRango() {
+        return distancia;
+    }
+
     @Override
     public String recargar() {
         return "Las armas arrojadizas son de un solo uso y no se recargan.";

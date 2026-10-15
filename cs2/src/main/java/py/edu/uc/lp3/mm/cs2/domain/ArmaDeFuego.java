@@ -38,6 +38,11 @@ public abstract class ArmaDeFuego extends Arma {
     public int getCapacidadCargador() { return capacidadCargador; }
     public void setCapacidadCargador(int capacidadCargador) { this.capacidadCargador = capacidadCargador; }
 
+    // UICapable: la velocidad del arma representa su velocidad de disparo
+    public double getVelocidadDisparo() {
+        return velocidad;
+    }
+
     @Override
     public String recargar() {
         this.municionActual = this.capacidadCargador;

@@ -4,5 +4,6 @@ public class ApiPaths {
 
 	public static final String ARMA = "/arma";
 	public static final String ARMA_ACCION = ARMA + "/accion";
+	public static final String UI_CAPABLES = "/ui-capables";
 
 }

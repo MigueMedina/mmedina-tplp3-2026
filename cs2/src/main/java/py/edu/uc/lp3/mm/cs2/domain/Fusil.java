@@ -1,6 +1,6 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
-public class Fusil extends ArmaDeFuego {
+public class Fusil extends ArmaDeFuego implements UICapable {
     private boolean automatica;
     private int mira;
     private int retroceso;
@@ -52,5 +52,22 @@ public class Fusil extends ArmaDeFuego {
     @Override
     public String obtenerDetalleTienda() {
         return "Fusil: " + getNombre() + " | Daño: " + getDano() + " | Precio: $" + getPrecio();
+    }
+
+    // UICapable: conserva el comportamiento default de mostrarEnUI()
+    @Override
+    public String getImagen() {
+        return "fusil_" + getNombre().toLowerCase().replace(" ", "_") + ".png";
+    }
+
+    @Override
+    public String getSonido() {
+        return "fusil_disparo.ogg";
+    }
+
+    // UICapable: rango fijo del fusil
+    @Override
+    public double getRango() {
+        return 30;
     }
 }
