@@ -22,6 +22,7 @@ classDiagram
         -int capacidadCargador
         +getVelocidadDisparo() double
         +recargar() String
+        +recargar(int cantidad) String
     }
 
     class Arrojadiza {
@@ -110,7 +111,7 @@ classDiagram
         +mostrarEnUI() String
     }
 
-    %% Relaciones de herencia
+    %% Relaciones de Herencia
     Arma <|-- ArmaDeFuego
     Arma <|-- Arrojadiza
 
