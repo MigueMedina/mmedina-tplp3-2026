@@ -5,27 +5,27 @@ public class Granada extends Arrojadiza implements UICapable {
     private boolean aturdimiento;
 
     public Granada() {
-        super("", 0, 0, "", 0, 0, 0, 0);
-        this.dano = 0;
-        this.aturdimiento = false;
+        this("Granada genérica", 0, 0);
     }
 
     public Granada(String nombre, int id, double precio) {
-        super(nombre, id, precio, "", 0, 0, 0, 0);
-        this.dano = 0;
-        this.aturdimiento = false;
+        this(nombre, id, precio, "", 0, 0, 0, 0, 0, false);
     }
 
     public Granada(String nombre, int id, double precio, String tipo, double radio, double distancia, double duracion,
                    double cooldown, int dano, boolean aturdimiento) {
         super(nombre, id, precio, tipo, radio, distancia, duracion, cooldown);
-        this.dano = dano;
+        setDano(dano);
         this.aturdimiento = aturdimiento;
     }
 
-    // Getters y Setters
+    // Getters y Setters (con invariantes)
     public int getDano() { return dano; }
-    public void setDano(int dano) { this.dano = dano; }
+    public void setDano(int dano) {
+        if (dano < 0)
+            throw new IllegalArgumentException("El daño debe ser no negativo");
+        this.dano = dano;
+    }
 
     public boolean isAturdimiento() { return aturdimiento; }
     public void setAturdimiento(boolean aturdimiento) { this.aturdimiento = aturdimiento; }

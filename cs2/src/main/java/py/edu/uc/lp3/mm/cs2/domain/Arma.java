@@ -6,20 +6,32 @@ public abstract class Arma {
     private double precio;
 
     public Arma(String nombre, int id, double precio) {
-        this.nombre = nombre;
-        this.id = id;
-        this.precio = precio;
+        setNombre(nombre);
+        setId(id);
+        setPrecio(precio);
     }
 
-    // Getters y Setters
+    // Getters y Setters (con invariantes)
     public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setNombre(String nombre) {
+        if (nombre == null || nombre.isBlank())
+            throw new IllegalArgumentException("El nombre no puede estar vacío");
+        this.nombre = nombre;
+    }
 
     public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public void setId(int id) {
+        if (id < 0)
+            throw new IllegalArgumentException("El id debe ser no negativo");
+        this.id = id;
+    }
 
     public double getPrecio() { return precio; }
-    public void setPrecio(double precio) { this.precio = precio; }
+    public void setPrecio(double precio) {
+        if (precio < 0)
+            throw new IllegalArgumentException("El precio debe ser no negativo");
+        this.precio = precio;
+    }
 
     // Métodos abstractos
     public abstract String disparar();

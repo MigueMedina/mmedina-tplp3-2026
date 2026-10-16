@@ -4,6 +4,14 @@ public class Pistola extends ArmaDeFuego {
     private boolean automatica;
     private boolean silenciador;
 
+    public Pistola() {
+        this("Pistola genérica", 0, 0);
+    }
+
+    public Pistola(String nombre, int id, double precio) {
+        this(nombre, id, precio, 0, 0, 0, 0, 0, false, false);
+    }
+
     public Pistola(String nombre, int id, double precio, int dano, int precision, double recarga, double velocidad,
                    int capacidadCargador, boolean automatica, boolean silenciador) {
         super(nombre, id, precio, dano, precision, recarga, velocidad, capacidadCargador);

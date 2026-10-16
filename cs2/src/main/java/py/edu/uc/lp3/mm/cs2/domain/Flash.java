@@ -5,30 +5,34 @@ public class Flash extends Arrojadiza implements UICapable {
     private double duracionCeguera;
 
     public Flash() {
-        super("", 0, 0, "", 0, 0, 0, 0);
-        this.intensidad = 0;
-        this.duracionCeguera = 0;
+        this("Flash genérica", 0, 0);
     }
 
     public Flash(String nombre, int id, double precio) {
-        super(nombre, id, precio, "", 0, 0, 0, 0);
-        this.intensidad = 0;
-        this.duracionCeguera = 0;
+        this(nombre, id, precio, "", 0, 0, 0, 0, 0, 0);
     }
 
     public Flash(String nombre, int id, double precio, String tipo, double radio, double distancia, double duracion,
                  double cooldown, int intensidad, double duracionCeguera) {
         super(nombre, id, precio, tipo, radio, distancia, duracion, cooldown);
-        this.intensidad = intensidad;
-        this.duracionCeguera = duracionCeguera;
+        setIntensidad(intensidad);
+        setDuracionCeguera(duracionCeguera);
     }
 
-    // Getters y Setters
+    // Getters y Setters (con invariantes)
     public int getIntensidad() { return intensidad; }
-    public void setIntensidad(int intensidad) { this.intensidad = intensidad; }
+    public void setIntensidad(int intensidad) {
+        if (intensidad < 0)
+            throw new IllegalArgumentException("La intensidad debe ser no negativa");
+        this.intensidad = intensidad;
+    }
 
     public double getDuracionCeguera() { return duracionCeguera; }
-    public void setDuracionCeguera(double duracionCeguera) { this.duracionCeguera = duracionCeguera; }
+    public void setDuracionCeguera(double duracionCeguera) {
+        if (duracionCeguera < 0)
+            throw new IllegalArgumentException("La duración de ceguera debe ser no negativa");
+        this.duracionCeguera = duracionCeguera;
+    }
 
     @Override
     public String disparar() {

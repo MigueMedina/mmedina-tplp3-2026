@@ -2,6 +2,14 @@ package py.edu.uc.lp3.mm.cs2.domain;
 
 public class Humo extends Arrojadiza {
 
+    public Humo() {
+        this("Humo genérico", 0, 0);
+    }
+
+    public Humo(String nombre, int id, double precio) {
+        this(nombre, id, precio, "", 0, 0, 0, 0);
+    }
+
     public Humo(String nombre, int id, double precio, String tipo, double radio, double distancia, double duracion,
                 double cooldown) {
         super(nombre, id, precio, tipo, radio, distancia, duracion, cooldown);

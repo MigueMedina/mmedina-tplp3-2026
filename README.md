@@ -43,12 +43,16 @@ cs2/
     │   │       │   ├── IndexController.java
     │   │       │   ├── ArmaController.java
     │   │       │   └── UIController.java
+    │   │       ├── advice/
+    │   │       │   └── GlobalExceptionHandler.java
     │   │       └── response/
     │   │           └── UIElementResponse.java
     │   └── resources/
     │       └── application.properties
     └── test/java/py/edu/uc/lp3/mm/cs2
-        └── Cs2ApplicationTests.java
+        ├── Cs2ApplicationTests.java
+        └── domain/
+            └── ArmaDomainTest.java
 ```
 
 ---
@@ -79,6 +83,7 @@ classDiagram
         -int capacidadCargador
         +getVelocidadDisparo() double
         +recargar() String
+        +recargar(int cantidad) String
     }
 
     class Arrojadiza {
@@ -196,6 +201,12 @@ classDiagram
 - **Polimorfismo:** `/arma/accion` y `/ui-capables` trabajan con referencias de
   tipo `Arma` y `UICapable` sin conocer la clase concreta.
 - **Encapsulamiento:** atributos `private` con getters/setters.
+- **Invariantes:** los setters y constructores validan el estado (nombre no
+  vacío, `id`/`precio`/`daño` no negativos, `precisión` entre 0 y 100,
+  `munición` dentro del cargador). Un valor inválido lanza
+  `IllegalArgumentException` y `GlobalExceptionHandler` responde **400**.
+- **Sobrecarga:** constructores sobrecargados en las armas concretas y
+  `recargar()` / `recargar(int cantidad)` en `ArmaDeFuego`.
 - **Interfaces:** `UICapable` es implementada por `Fusil`, `AWP`, `Flash` y
   `Granada`, que aportan imagen, sonido, velocidad de disparo y rango.
 
@@ -230,6 +241,13 @@ cd cs2
 
 La API queda disponible en `http://localhost:8080`.
 
+Alternativa: empaquetar y correr el JAR.
+
+```bash
+./mvnw clean package
+java -jar target/cs2-0.0.1-SNAPSHOT.jar
+```
+
 ### 3. Detener la aplicación
 
 Presionar `Ctrl + C` en la terminal donde corre.
@@ -242,8 +260,9 @@ Presionar `Ctrl + C` en la terminal donde corre.
 ./mvnw test
 ```
 
-Resultado esperado: `BUILD SUCCESS`, con el test de contexto
-`Cs2ApplicationTests.contextLoads()` en verde.
+Resultado esperado: `BUILD SUCCESS`, con **11 tests** en verde:
+- `Cs2ApplicationTests.contextLoads()` (el contexto Spring arranca).
+- `ArmaDomainTest` (10 tests de invariantes, polimorfismo y sobrecarga).
 
 ---
 
@@ -413,3 +432,18 @@ curl "http://localhost:8080/arma/accion?tipo=granada&nombre=HE&id=4&precio=300&d
   "mensaje_recarga": "Las armas arrojadizas son de un solo uso y no se recargan."
 }
 ```
+
+### 5. Entrada inválida (400)
+
+Las violaciones de invariantes del dominio devuelven **400** con el mensaje:
+
+```bash
+curl "http://localhost:8080/arma?tipo=pistola&nombre=USP&id=1&precio=-100&dano=35&precision=80&recarga=2&velocidad=8&capacidadCargador=12&automatica=false&silenciador=false&mira=0&retroceso=0&radio=0&duracionCeguera=0&intensidad=0"
+```
+
+```json
+{"status":400,"error":"Bad Request","mensaje":"El precio debe ser no negativo","path":"/arma"}
+```
+
+Otros ejemplos: `precision=150` → `"La precisión debe estar entre 0 y 100"`;
+`nombre=` (vacío) → `"El nombre no puede estar vacío"`.
