@@ -21,21 +21,21 @@ public class ArmaController {
 	@GetMapping(ApiPaths.ARMA)
 	public Arma crearArma(
 			@RequestParam(defaultValue = "pistola") String tipo,
-			@RequestParam String nombre,
-			@RequestParam int id,
-			@RequestParam double precio,
-			@RequestParam int dano,
-			@RequestParam int precision,
-			@RequestParam double recarga,
-			@RequestParam double velocidad,
-			@RequestParam int capacidadCargador,
-			@RequestParam boolean automatica,
-			@RequestParam boolean silenciador,
-			@RequestParam int mira,
-			@RequestParam int retroceso,
-			@RequestParam double radio,
-			@RequestParam double duracionCeguera,
-			@RequestParam int intensidad) {
+			@RequestParam(defaultValue = "Arma") String nombre,
+			@RequestParam(defaultValue = "1") int id,
+			@RequestParam(defaultValue = "100") double precio,
+			@RequestParam(defaultValue = "10") int dano,
+			@RequestParam(defaultValue = "50") int precision,
+			@RequestParam(defaultValue = "2.0") double recarga,
+			@RequestParam(defaultValue = "5.0") double velocidad,
+			@RequestParam(defaultValue = "30") int capacidadCargador,
+			@RequestParam(defaultValue = "false") boolean automatica,
+			@RequestParam(defaultValue = "false") boolean silenciador,
+			@RequestParam(defaultValue = "1") int mira,
+			@RequestParam(defaultValue = "10") int retroceso,
+			@RequestParam(defaultValue = "1.0") double radio,
+			@RequestParam(defaultValue = "1.0") double duracionCeguera,
+			@RequestParam(defaultValue = "50") int intensidad) {
 		Arma arma;
 		switch (tipo) {
 			case "fusil":
@@ -64,21 +64,21 @@ public class ArmaController {
 	@GetMapping(ApiPaths.ARMA_ACCION)
 	public Map<String, Object> accionArma(
 			@RequestParam(defaultValue = "pistola") String tipo,
-			@RequestParam String nombre,
-			@RequestParam int id,
-			@RequestParam double precio,
-			@RequestParam int dano,
-			@RequestParam int precision,
-			@RequestParam double recarga,
-			@RequestParam double velocidad,
-			@RequestParam int capacidadCargador,
-			@RequestParam boolean automatica,
-			@RequestParam boolean silenciador,
-			@RequestParam int mira,
-			@RequestParam int retroceso,
-			@RequestParam double radio,
-			@RequestParam double duracionCeguera,
-			@RequestParam int intensidad) {
+			@RequestParam(defaultValue = "Arma") String nombre,
+			@RequestParam(defaultValue = "1") int id,
+			@RequestParam(defaultValue = "100") double precio,
+			@RequestParam(defaultValue = "10") int dano,
+			@RequestParam(defaultValue = "50") int precision,
+			@RequestParam(defaultValue = "2.0") double recarga,
+			@RequestParam(defaultValue = "5.0") double velocidad,
+			@RequestParam(defaultValue = "30") int capacidadCargador,
+			@RequestParam(defaultValue = "false") boolean automatica,
+			@RequestParam(defaultValue = "false") boolean silenciador,
+			@RequestParam(defaultValue = "1") int mira,
+			@RequestParam(defaultValue = "10") int retroceso,
+			@RequestParam(defaultValue = "1.0") double radio,
+			@RequestParam(defaultValue = "1.0") double duracionCeguera,
+			@RequestParam(defaultValue = "50") int intensidad) {
 		Arma arma;
 		switch (tipo) {
 			case "fusil":

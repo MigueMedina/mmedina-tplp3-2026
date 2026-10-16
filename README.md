@@ -294,26 +294,28 @@ valor cae en `pistola`.
 
 ### Parámetros de `/arma` y `/arma/accion`
 
-Todos son obligatorios salvo `tipo` (que por defecto es `pistola`).
+Todos tienen valor por defecto, así que basta con indicar `tipo`
+(por ejemplo `/arma?tipo=awp`). Los parámetros que no apliquen al tipo
+elegido simplemente se ignoran.
 
-| Parámetro           | Tipo    | Usado por                                     |
-|---------------------|---------|-----------------------------------------------|
-| `tipo`              | String  | selector de clase                             |
-| `nombre`            | String  | todas                                         |
-| `id`                | int     | todas                                         |
-| `precio`            | double  | todas                                         |
-| `dano`              | int     | fusil, awp, pistola, granada                  |
-| `precision`         | int     | fusil, awp, pistola                           |
-| `recarga`           | double  | fusil, awp, pistola                           |
-| `velocidad`         | double  | fusil, awp, pistola                           |
-| `capacidadCargador` | int     | fusil, awp, pistola                           |
-| `automatica`        | boolean | fusil, pistola (en granada => `aturdimiento`) |
-| `silenciador`       | boolean | fusil, awp, pistola                           |
-| `mira`              | int     | fusil, awp                                    |
-| `retroceso`         | int     | fusil, awp                                    |
-| `radio`             | double  | flash, granada                                |
-| `duracionCeguera`   | double  | flash                                         |
-| `intensidad`        | int     | flash                                         |
+| Parámetro           | Tipo    | Por defecto | Usado por                                     |
+|---------------------|---------|-------------|-----------------------------------------------|
+| `tipo`              | String  | `pistola`   | selector de clase                             |
+| `nombre`            | String  | `Arma`      | todas                                         |
+| `id`                | int     | `1`         | todas                                         |
+| `precio`            | double  | `100`       | todas                                         |
+| `dano`              | int     | `10`        | fusil, awp, pistola, granada                  |
+| `precision`         | int     | `50`        | fusil, awp, pistola                           |
+| `recarga`           | double  | `2.0`       | fusil, awp, pistola                           |
+| `velocidad`         | double  | `5.0`       | fusil, awp, pistola                           |
+| `capacidadCargador` | int     | `30`        | fusil, awp, pistola                           |
+| `automatica`        | boolean | `false`     | fusil, pistola (en granada => `aturdimiento`) |
+| `silenciador`       | boolean | `false`     | fusil, awp, pistola                           |
+| `mira`              | int     | `1`         | fusil, awp                                    |
+| `retroceso`         | int     | `10`        | fusil, awp                                    |
+| `radio`             | double  | `1.0`       | flash, granada                                |
+| `duracionCeguera`   | double  | `1.0`       | flash                                         |
+| `intensidad`        | int     | `50`        | flash                                         |
 
 ---
 
@@ -345,6 +347,17 @@ curl http://localhost:8080/ui-capables
 ```
 
 ### 3. Crear un arma (`/arma`)
+
+Como todos los parámetros tienen valor por defecto, alcanza con indicar
+`tipo` (acá una `AWP`; se puede sobrescribir cualquier campo):
+
+```bash
+curl "http://localhost:8080/arma?tipo=awp"
+```
+
+```json
+{"capacidadCargador":30,"dano":10,"id":1,"imagen":"awp_arma.png","mira":1,"municionActual":30,"nombre":"Arma","precio":100.0,"precision":50,"rango":100.0,"recarga":2.0,"retroceso":10,"silenciador":false,"sonido":"awp_disparo.ogg","velocidad":5.0,"velocidadDisparo":5.0}
+```
 
 Pistola (tipo por defecto):
 
