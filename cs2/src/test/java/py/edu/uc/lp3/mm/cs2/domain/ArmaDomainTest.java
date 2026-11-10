@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import py.edu.uc.lp3.mm.cs2.exception.MunicionInsuficienteException;
+
 class ArmaDomainTest {
 
     @Test
@@ -96,5 +98,32 @@ class ArmaDomainTest {
         assertEquals(30, fusil.getMunicionActual());
 
         assertThrows(IllegalArgumentException.class, () -> fusil.recargar(0));
+    }
+
+    @Test
+    void dispararDescuentaMunicionYFallaConElCargadorVacio() {
+        Pistola pistola = new Pistola("USP", 1, 200, 35, 80, 2.2, 8, 2, false, true);
+        pistola.setMunicionActual(2);
+
+        assertTrue(pistola.disparar().contains("1/2"));
+        assertEquals(1, pistola.getMunicionActual());
+        assertTrue(pistola.disparar().contains("0/2"));
+        assertEquals(0, pistola.getMunicionActual());
+
+        assertThrows(MunicionInsuficienteException.class, pistola::disparar);
+    }
+
+    @Test
+    void recargarConsumeCargadoresDeRepuestoYFallaSinEllos() {
+        Fusil fusil = new Fusil("AK", 1, 2700, 36, 75, 2, 10, 2, true, 1, 1, false);
+        fusil.setMunicionActual(0);
+        fusil.setCargadoresRestantes(1);
+
+        assertTrue(fusil.recargar().contains("Cargadores restantes: 0"));
+        assertEquals(2, fusil.getMunicionActual());
+        assertEquals(0, fusil.getCargadoresRestantes());
+
+        fusil.setMunicionActual(0);
+        assertThrows(MunicionInsuficienteException.class, fusil::recargar);
     }
 }
