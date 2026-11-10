@@ -29,6 +29,10 @@ replay_pid*
 
 ### Maven ###
 target/
+
+### H2 (base de datos local) ###
+data/
+cs2/data/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
