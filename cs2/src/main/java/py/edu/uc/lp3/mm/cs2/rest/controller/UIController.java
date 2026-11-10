@@ -17,7 +17,7 @@ import py.edu.uc.lp3.mm.cs2.rest.response.UIElementResponse;
 public class UIController {
 
 	@GetMapping(ApiPaths.UI_CAPABLES)
-	public List<UIElementResponse> obtenerElementosUI() {
+	public List<UICapable> obtenerElementosUI() {
 		UICapable fusil = new Fusil("AK-47", 1, 2700, 36, 75, 2.5, 10, 30, true, 2, 20, false);
 		UICapable flash = new Flash("Flashbang", 2, 200, "flash", 5, 20, 2, 0.5, 90, 3.5);
 		UICapable awp = new AWP("AWP", 3, 4750, 115, 98, 3.7, 5, 10, 2, 30, false);
@@ -30,7 +30,7 @@ public class UIController {
 				crearRespuesta("Granada", granada));
 	}
 
-	private UIElementResponse crearRespuesta(String tipo, UICapable elemento) {
+	private UICapable crearRespuesta(String tipo, UICapable elemento) {
 		return new UIElementResponse(
 				tipo,
 				elemento.getImagen(),
