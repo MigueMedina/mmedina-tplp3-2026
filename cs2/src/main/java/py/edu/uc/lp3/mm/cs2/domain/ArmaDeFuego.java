@@ -1,12 +1,26 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
-public abstract class ArmaDeFuego extends Arma {
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+import py.edu.uc.lp3.mm.cs2.exception.DatosInvalidosException;
+import py.edu.uc.lp3.mm.cs2.exception.MunicionInsuficienteException;
+
+@Entity
+@DiscriminatorValue("FUEGO")
+public abstract class ArmaDeFuego extends Arma implements ArmaOfensiva {
+    public static final int CARGADORES_INICIALES = 3;
+
     private int dano;
     private int precision;
     private double recarga;
     private double velocidad;
     private int municionActual;
     private int capacidadCargador;
+    private int cargadoresRestantes = CARGADORES_INICIALES;
+
+    protected ArmaDeFuego() {
+    }
 
     public ArmaDeFuego(String nombre, int id, double precio, int dano, int precision, double recarga, double velocidad,
                        int capacidadCargador) {
@@ -65,15 +79,48 @@ public abstract class ArmaDeFuego extends Arma {
         }
     }
 
+    public int getCargadoresRestantes() { return cargadoresRestantes; }
+    public void setCargadoresRestantes(int cargadoresRestantes) {
+        if (cargadoresRestantes < 0)
+            throw new IllegalArgumentException("Los cargadores restantes deben ser no negativos");
+        this.cargadoresRestantes = cargadoresRestantes;
+    }
+
     // UICapable: la velocidad del arma representa su velocidad de disparo
     public double getVelocidadDisparo() {
         return velocidad;
     }
 
+    protected String dispararConMunicion(String mensaje) {
+        consumirMunicion(1);
+        return mensaje + " Quedan " + municionActual + "/" + capacidadCargador + " balas.";
+    }
+
+    protected void consumirMunicion(int balas) {
+        if (balas <= 0) {
+            throw new DatosInvalidosException("La cantidad de balas a consumir debe ser positiva");
+        }
+        if (municionActual < balas) {
+            throw new MunicionInsuficienteException(
+                    getNombre() + " no puede disparar: cargador insuficiente ("
+                            + municionActual + " balas, necesita " + balas + ")");
+        }
+        municionActual -= balas;
+    }
+
     @Override
     public String recargar() {
-        this.municionActual = this.capacidadCargador;
-        return "Munición recargada a " + this.municionActual + " balas";
+        if (municionActual == capacidadCargador) {
+            return getNombre() + " ya tiene el cargador lleno";
+        }
+        if (cargadoresRestantes <= 0) {
+            throw new MunicionInsuficienteException(
+                    getNombre() + " no tiene cargadores de repuesto");
+        }
+        cargadoresRestantes--;
+        municionActual = capacidadCargador;
+        return "Munición recargada a " + municionActual + " balas. Cargadores restantes: "
+                + cargadoresRestantes;
     }
 
     // Sobrecarga de recargar(): recarga parcial hasta completar el cargador

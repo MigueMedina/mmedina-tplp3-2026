@@ -1,10 +1,15 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("ESCOPETA")
 public class Escopeta extends ArmaDeFuego {
     private int perdigon;
     private double dispersion;
 
-    public Escopeta() {
+    protected Escopeta() {
         this("Escopeta genérica", 0, 0);
     }
 
@@ -36,7 +41,8 @@ public class Escopeta extends ArmaDeFuego {
 
     @Override
     public String disparar() {
-        return "¡Boom! Disparo de la escopeta " + getNombre() + " con " + perdigon + " perdigones";
+        return dispararConMunicion(
+                "¡Boom! Disparo de la escopeta " + getNombre() + " con " + perdigon + " perdigones.");
     }
 
     @Override

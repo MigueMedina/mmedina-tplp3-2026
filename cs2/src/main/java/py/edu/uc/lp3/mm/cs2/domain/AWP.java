@@ -1,11 +1,16 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("AWP")
 public class AWP extends ArmaDeFuego implements UICapable {
     private int mira;
     private int retroceso;
     private boolean silenciador;
 
-    public AWP() {
+    protected AWP() {
         this("AWP genérico", 0, 0);
     }
 
@@ -41,7 +46,8 @@ public class AWP extends ArmaDeFuego implements UICapable {
 
     @Override
     public String disparar() {
-        return "¡Crack! Disparo del AWP " + getNombre() + " (retroceso " + retroceso + ")";
+        return dispararConMunicion(
+                "¡Crack! Disparo del AWP " + getNombre() + " (retroceso " + retroceso + ").");
     }
 
     @Override

@@ -1,10 +1,15 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("PISTOLA")
 public class Pistola extends ArmaDeFuego {
     private boolean automatica;
     private boolean silenciador;
 
-    public Pistola() {
+    protected Pistola() {
         this("Pistola genérica", 0, 0);
     }
 
@@ -28,7 +33,7 @@ public class Pistola extends ArmaDeFuego {
 
     @Override
     public String disparar() {
-        return "¡Pum! Disparo de la pistola " + getNombre();
+        return dispararConMunicion("¡Pum! Disparo de la pistola " + getNombre() + ".");
     }
 
     @Override

@@ -1,10 +1,15 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
-public class Granada extends Arrojadiza implements UICapable {
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("GRANADA")
+public class Granada extends Arrojadiza implements UICapable, ArmaOfensiva {
     private int dano;
     private boolean aturdimiento;
 
-    public Granada() {
+    protected Granada() {
         this("Granada genérica", 0, 0);
     }
 

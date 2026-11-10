@@ -1,11 +1,19 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("ARROJADIZA")
 public abstract class Arrojadiza extends Arma {
     private String tipo;
     private double radio;
     private double distancia;
     private double duracion;
     private double cooldown;
+
+    protected Arrojadiza() {
+    }
 
     public Arrojadiza(String nombre, int id, double precio, String tipo, double radio, double distancia, double duracion,
                       double cooldown) {

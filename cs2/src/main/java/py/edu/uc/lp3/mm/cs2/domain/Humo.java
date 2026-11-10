@@ -1,8 +1,13 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("HUMO")
 public class Humo extends Arrojadiza {
 
-    public Humo() {
+    protected Humo() {
         this("Humo genérico", 0, 0);
     }
 

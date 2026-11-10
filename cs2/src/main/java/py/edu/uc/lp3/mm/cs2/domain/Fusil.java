@@ -1,12 +1,17 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("FUSIL")
 public class Fusil extends ArmaDeFuego implements UICapable {
     private boolean automatica;
     private int mira;
     private int retroceso;
     private boolean silenciador;
 
-    public Fusil() {
+    protected Fusil() {
         this("Fusil genérico", 0, 0);
     }
 
@@ -46,7 +51,8 @@ public class Fusil extends ArmaDeFuego implements UICapable {
 
     @Override
     public String disparar() {
-        return "¡Bang! Ráfaga del fusil " + getNombre() + " (retroceso " + retroceso + ")";
+        return dispararConMunicion(
+                "¡Bang! Ráfaga del fusil " + getNombre() + " (retroceso " + retroceso + ").");
     }
 
     @Override

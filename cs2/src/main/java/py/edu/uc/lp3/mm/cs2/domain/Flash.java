@@ -1,10 +1,15 @@
 package py.edu.uc.lp3.mm.cs2.domain;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("FLASH")
 public class Flash extends Arrojadiza implements UICapable {
     private int intensidad;
     private double duracionCeguera;
 
-    public Flash() {
+    protected Flash() {
         this("Flash genérica", 0, 0);
     }
 
