@@ -10,8 +10,7 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
 - **Rol:** asistente de programación para Java, Spring Boot, JPA, pruebas y
   documentación.
 - **Herramientas auxiliares previas registradas en el proyecto:** OpenCode
-  1.18.18 con modelo Big Pickle y Gemini (Google) para iteraciones anteriores de
-  POO-06.
+  1.18.18 con modelo Big Pickle y Gemini 3.5 Flash-Lite.
 
 ## Alcance de la colaboración
 
