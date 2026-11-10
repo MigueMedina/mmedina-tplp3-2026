@@ -6,6 +6,10 @@
 - **Paquete base:** `py.edu.uc.lp3.mm.cs2`
 - **Stack:** Java 21, Spring Boot 4.1.1, Spring Data JPA, H2, Maven Wrapper.
 
+## Registro de Asistencia de IA y Herramientas
+
+- **Herramientas de desarrollo:** OpenCode 1.18.18 model Big Pickle y Gemini 3.5 Flash-Lite.
+
 ## Objetivo
 
 Publicar una API REST sobre el dominio de Counter-Strike 2 que persista armas,
@@ -214,6 +218,4 @@ cambiando el jugador objetivo.
 
 ## Entrega
 
-Antes de subir a Classroom, reemplazar esta línea por el enlace exacto al commit
-de la solución y verificar que el repositorio incluya los cambios de código,
-pruebas, README, BITACORA, especificaciones y colección de Insomnia.
+Link del commit del repositorio.
