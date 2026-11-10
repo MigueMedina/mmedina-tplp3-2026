@@ -281,8 +281,8 @@ declara `@JsonTypeInfo` con la propiedad `tipoArma` y `@JsonSubTypes` para
 
 1. **Regla de munición:** cada disparo descuenta una bala de `municionActual`.
    Si el cargador no tiene balas, el dominio lanza `MunicionInsuficienteException`
-   y la API responde 409. Recargar consume un cargador de repuesto; sin repuestos
-   también se responde 409.
+   y la API responde 409. Recargar, en cualquiera de sus sobrecargas, consume un
+   cargador de repuesto; sin repuestos también se responde 409.
 2. **Regla del chaleco:** si el jugador tiene chaleco, absorbe el 50% del daño
    mientras le quede durabilidad. La durabilidad baja en la cantidad absorbida.
    El daño restante pasa a la vida.
@@ -640,7 +640,7 @@ cd cs2
 ./mvnw test
 ```
 
-Resultado esperado: `BUILD SUCCESS` con 33 tests de:
+Resultado esperado: `BUILD SUCCESS` con 34 tests de:
 
 - arranque del contexto Spring,
 - invariantes del dominio de armas,
@@ -708,8 +708,10 @@ La **sobrecarga** ocurre en una misma clase cuando hay varios métodos con el
 mismo nombre y distinta lista de argumentos. Se agregó en `Arma` y sus hijas con
 constructores simples y completos, y en `ArmaDeFuego` con `recargar()` para
 llenar el cargador y `recargar(int cantidad)` para recargar una cantidad
-parcial. El compilador elige la versión según los argumentos; no hay despacho
-polimórfico entre clases.
+parcial. Ambas sobrecargas consumen un cargador de repuesto; la variante con
+cantidad agrega hasta lo pedido sin superar la capacidad del cargador. El
+compilador elige la versión según los argumentos; no hay despacho polimórfico
+entre clases.
 
 La **sobreescritura** ocurre entre una superclase o interfaz y una subclase,
 cuando se redefine el mismo método con la misma firma. `Arma` declara

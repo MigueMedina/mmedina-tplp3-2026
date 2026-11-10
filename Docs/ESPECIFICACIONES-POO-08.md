@@ -92,11 +92,13 @@ JPA pueda hidratarlas sin exponerlos al cliente. Las clases concretas mantienen
 constructores de negocio públicos y sobrecargados: uno simple y uno completo.
 
 La sobrecarga está en `ArmaDeFuego.recargar()` y `recargar(int cantidad)`, además
-de los constructores simples y completos. La sobreescritura está en
-`disparar()`, `recargar()` y `obtenerDetalleTienda()` de las clases hijas, y en
-`mostrarEnUI()` y `getVelocidadDisparo()` de `Flash` y `Granada`. La primera se
-resuelve al compilar por la lista de argumentos; la segunda se resuelve en
-ejecución por el tipo real del objeto.
+de los constructores simples y completos. Ambas sobrecargas consumen un
+cargador de repuesto: la variante sin argumentos llena el cargador y la variante
+con cantidad agrega hasta lo pedido, sin superar la capacidad. La sobreescritura
+está en `disparar()`, `recargar()` y `obtenerDetalleTienda()` de las clases
+hijas, y en `mostrarEnUI()` y `getVelocidadDisparo()` de `Flash` y `Granada`. La
+primera se resuelve al compilar por la lista de argumentos; la segunda se
+resuelve en ejecución por el tipo real del objeto.
 
 ## Invariantes
 
@@ -110,8 +112,10 @@ ejecución por el tipo real del objeto.
 - La munición actual debe estar entre 0 y la capacidad del cargador.
 - Cada disparo consume una bala; si no hay balas se lanza
   `MunicionInsuficienteException`.
-- Recargar consume un cargador de repuesto; si no quedan, se lanza
-  `MunicionInsuficienteException`.
+- Cualquiera de las sobrecargas de recargar consume un cargador de repuesto; si
+  no quedan, se lanza `MunicionInsuficienteException`. La recarga parcial
+  (`recargar(int cantidad)`) también consume un repuesto aunque la cantidad
+  pedida no llene el cargador.
 
 ### Jugador y chaleco
 

@@ -113,21 +113,25 @@ public abstract class ArmaDeFuego extends Arma implements ArmaOfensiva {
         if (municionActual == capacidadCargador) {
             return getNombre() + " ya tiene el cargador lleno";
         }
+        return recargar(capacidadCargador);
+    }
+
+    // Sobrecarga de recargar(): recarga parcial hasta completar el cargador.
+    // Toda recarga consume un cargador de repuesto, aunque la cantidad pedida
+    // no alcance a llenar el cargador.
+    public String recargar(int cantidad) {
+        if (cantidad <= 0)
+            throw new IllegalArgumentException("La cantidad a recargar debe ser positiva");
+        if (municionActual == capacidadCargador) {
+            return getNombre() + " ya tiene el cargador lleno";
+        }
         if (cargadoresRestantes <= 0) {
             throw new MunicionInsuficienteException(
                     getNombre() + " no tiene cargadores de repuesto");
         }
         cargadoresRestantes--;
-        municionActual = capacidadCargador;
-        return "Munición recargada a " + municionActual + " balas. Cargadores restantes: "
-                + cargadoresRestantes;
-    }
-
-    // Sobrecarga de recargar(): recarga parcial hasta completar el cargador
-    public String recargar(int cantidad) {
-        if (cantidad <= 0)
-            throw new IllegalArgumentException("La cantidad a recargar debe ser positiva");
         this.municionActual = Math.min(capacidadCargador, municionActual + cantidad);
-        return "Munición recargada a " + this.municionActual + " balas";
+        return "Munición recargada a " + this.municionActual + " balas. Cargadores restantes: "
+                + cargadoresRestantes;
     }
 }

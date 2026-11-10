@@ -87,17 +87,30 @@ class ArmaDomainTest {
     }
 
     @Test
-    void sobrecargaRecargarParcial() {
+    void sobrecargaRecargarParcialConsumeCargadorDeRepuesto() {
         Fusil fusil = new Fusil("AK", 1, 2700, 36, 75, 2, 10, 30, true, 1, 1, false);
         fusil.setMunicionActual(0);
 
-        assertTrue(fusil.recargar(10).contains("10"));
+        assertTrue(fusil.recargar(10).contains("Cargadores restantes: 2"));
         assertEquals(10, fusil.getMunicionActual());
+        assertEquals(2, fusil.getCargadoresRestantes());
 
         fusil.recargar(100);
         assertEquals(30, fusil.getMunicionActual());
+        assertEquals(1, fusil.getCargadoresRestantes());
 
         assertThrows(IllegalArgumentException.class, () -> fusil.recargar(0));
+    }
+
+    @Test
+    void laRecargaParcialFallaSinCargadoresDeRepuesto() {
+        Fusil fusil = new Fusil("AK", 1, 2700, 36, 75, 2, 10, 30, true, 1, 1, false);
+        fusil.setMunicionActual(0);
+        fusil.setCargadoresRestantes(0);
+
+        assertThrows(MunicionInsuficienteException.class, () -> fusil.recargar(10));
+        assertEquals(0, fusil.getMunicionActual());
+        assertEquals(0, fusil.getCargadoresRestantes());
     }
 
     @Test

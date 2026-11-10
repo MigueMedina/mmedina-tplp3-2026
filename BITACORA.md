@@ -111,10 +111,18 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
   interfaz, entidades con constructor vacío `protected`, DELETE movidos a
   `09 - Limpieza` y `tipoArma` normalizado en minúsculas.
 
+### 13. Recarga parcial con consumo de repuesto
+- **Prompt resumido:** corregir `recargar(int cantidad)` para que también
+  consuma un cargador de repuesto, agregar pruebas del caso sin repuestos y
+  documentar la regla en README y especificaciones.
+- **Resultado:** la recarga parcial descuenta un repuesto, respeta la capacidad
+  máxima del cargador y falla con `MunicionInsuficienteException` cuando no
+  quedan repuestos.
+
 ## Verificación de calidad
 
 - `cd cs2 && ./mvnw clean compile` → `BUILD SUCCESS`.
-- `cd cs2 && ./mvnw test` → `BUILD SUCCESS` con 33 tests, 0 fallas.
+- `cd cs2 && ./mvnw test` → `BUILD SUCCESS` con 34 tests, 0 fallas.
 - Se verificaron por HTTP los 409 de munición insuficiente y jugador eliminado,
   además de la persistencia del blindaje después de una simulación.
 - Prueba manual con la aplicación en ejecución:
