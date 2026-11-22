@@ -48,9 +48,9 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
 10. `07 - Excepciones` → ejecutar en este orden:
     - **404 - RecursoNoEncontradoException**.
     - **400 - DatosInvalidosException (POST ilegal)**.
-    - **GET armas despues del POST ilegal**. Comparar con el listado del paso 2:
+    - **GET armas después del POST ilegal**. Comparar con el listado del paso 2:
       el arma inválida no debe aparecer.
-    - **Preparar 409: fusil con cargador vacio**. Copiar el `id` en
+    - **Preparar 409: fusil con cargador vacío**. Copiar el `id` en
       `arma_sin_municion_id`.
     - **409 - MunicionInsuficienteException**. Debe responder `409` y el JSON
       debe incluir `"excepcion": "MunicionInsuficienteException"`.
