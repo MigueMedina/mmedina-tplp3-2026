@@ -15,8 +15,9 @@
 Publicar una API REST sobre el dominio de Counter-Strike 2 que persista armas,
 jugadores y chalecos en H2, permita el CRUD completo de la familia de armas y
 ejecute una simulación de disparo con dos reglas de negocio: consumo real de
-munición y absorción de daño por chaleco. Las reglas viven en el dominio, el
-controller solo traduce HTTP y las excepciones de dominio se convierten en
+munición y absorción de daño por chaleco. Las validaciones, las reglas y las
+excepciones viven en la capa service; las entidades solo guardan el estado
+encapsulado. El controller traduce HTTP y las excepciones se convierten en
 respuestas JSON con códigos HTTP diferenciados.
 
 ## Clases del modelo
@@ -25,7 +26,8 @@ respuestas JSON con códigos HTTP diferenciados.
 - `ArmaDeFuego` y `Arrojadiza`: ramas abstractas de la jerarquía.
 - `Fusil`, `Pistola`, `Escopeta`, `AWP`, `Flash`, `Humo` y `Granada`: clases
   concretas persistidas.
-- `Jugador`: entidad con vida, estado vivo/muerto y chaleco opcional.
+- `Jugador`: entidad con vida, estado vivo/muerto y chaleco opcional; también
+  implementa `UICapable`.
 - `Chaleco`: entidad con durabilidad y absorción del 50% del daño.
 - `Simulacion`: historial persistido de cada disparo.
 - `UICapable` y `ArmaOfensiva`: interfaces de dominio.
@@ -84,8 +86,11 @@ usa el mismo vocabulario en minúsculas (`fusil`, `pistola`, `escopeta`, `awp`,
 ## Interfaces, constructores y polimorfismo
 
 `GET /ui-capables` declara retorno `List<UICapable>` y devuelve objetos
-`UIElementResponse`, que implementan `UICapable`. Así el contrato del controller
-habla con la interfaz del dominio y no con un DTO concreto.
+`UIElementResponse`, que implementan `UICapable`. El servicio recorre las armas
+y los jugadores guardados en H2, filtra los que implementan la interfaz y el
+controller los traduce al contrato de la interfaz del dominio, no a un DTO
+concreto. `UICapable` la implementan `Fusil`, `AWP`, `Flash` y `Granada` desde la
+familia de armas, y `Jugador` desde otra familia del modelo.
 
 Todos los constructores sin argumentos de las entidades son `protected` para que
 JPA pueda hidratarlas sin exponerlos al cliente. Las clases concretas mantienen
@@ -100,7 +105,12 @@ hijas, y en `mostrarEnUI()` y `getVelocidadDisparo()` de `Flash` y `Granada`. La
 primera se resuelve al compilar por la lista de argumentos; la segunda se
 resuelve en ejecución por el tipo real del objeto.
 
-## Invariantes
+## Validaciones e invariantes
+
+`ValidadorService` valida los datos antes de construir o modificar entidades;
+`SimulacionService` valida las reglas de juego antes de pedirle a las entidades
+que cambien su estado. Las entidades no lanzan excepciones: solo conservan el
+estado y ofrecen mensajes como `recibirDisparo()` o `recargar()`.
 
 ### Arma
 
@@ -110,20 +120,21 @@ resuelve en ejecución por el tipo real del objeto.
 - En un arma de fuego, la capacidad del cargador y los cargadores restantes no
   pueden ser negativos.
 - La munición actual debe estar entre 0 y la capacidad del cargador.
-- Cada disparo consume una bala; si no hay balas se lanza
-  `MunicionInsuficienteException`.
-- Cualquiera de las sobrecargas de recargar consume un cargador de repuesto; si
-  no quedan, se lanza `MunicionInsuficienteException`. La recarga parcial
-  (`recargar(int cantidad)`) también consume un repuesto aunque la cantidad
-  pedida no llene el cargador.
+- `SimulacionService` comprueba la munición antes de disparar; si no hay balas,
+  lanza `MunicionInsuficienteException`.
+- Cualquiera de las sobrecargas de recargar consume un cargador de repuesto; sin
+  repuestos el servicio responde `MunicionInsuficienteException`. La recarga
+  parcial (`recargar(int cantidad)`) también consume un repuesto aunque la
+  cantidad pedida no llene el cargador.
 
 ### Jugador y chaleco
 
 - La vida inicial es 100 y siempre está entre 0 y 100.
-- Un daño menor o igual a cero es inválido.
-- Un jugador con vida 0 está muerto y no puede recibir otro disparo:
-  `JugadorEliminadoException`.
-- El chaleco tiene durabilidad entre 0 y 100.
+- `ValidadorService` rechaza el nombre vacío, la vida fuera de rango y la
+  durabilidad del chaleco fuera de rango con `DatosInvalidosException`.
+- Un daño menor o igual a cero es rechazado por `SimulacionService`.
+- Un jugador con vida 0 está muerto; `SimulacionService` lanza
+  `JugadorEliminadoException` antes de intentar otro disparo.
 - El chaleco absorbe el 50% del daño, limitado por su durabilidad restante; el
   resto del daño se descuenta de la vida.
 - La vida nunca queda negativa: el mínimo es 0.
@@ -133,6 +144,8 @@ resuelve en ejecución por el tipo real del objeto.
 - Debe indicarse `jugadorId` y `armaId`.
 - El arma debe existir, el jugador debe existir y el arma debe implementar
   `ArmaOfensiva`.
+- El servicio verifica jugador vivo, daño positivo y munición disponible antes
+  de modificar el estado.
 - El disparo consume munición y actualiza vida y chaleco en una sola transacción.
 - Se persiste una fila en `simulaciones` con vida antes, vida después, daño,
   jugador, arma y fecha.
@@ -187,8 +200,8 @@ cambiando el jugador objetivo.
    - `POST /simulacion/disparar` responde 201, descuenta munición y reduce vida
      según el chaleco.
    - `GET /jugadores/{id}` y `GET /armas/{id}` muestran el estado persistido.
-   - `GET /ui-capables` devuelve los elementos de la interfaz y el
-     `tipoArma` del historial usa minúsculas.
+   - `GET /ui-capables` devuelve las armas y los jugadores persistentes que
+     implementan la interfaz, y el `tipoArma` del historial usa minúsculas.
    - Un arma con cargador vacío responde 409 con
      `"excepcion":"MunicionInsuficienteException"`.
    - Un segundo disparo a un jugador con vida 0 responde 409 con
@@ -208,11 +221,12 @@ cambiando el jugador objetivo.
 - El CRUD persiste y lee desde H2, no desde listas en memoria.
 - La herencia de armas se refleja en la tabla `armas` y en el campo JSON
   `tipoArma`.
-- Las reglas de munición y chaleco se ejecutan en métodos del dominio.
+- Las reglas de munición y chaleco se validan en la capa service y las entidades
+  aplican los cambios de estado.
 - La simulación actualiza más de un objeto y deja historial persistido.
 - Cada excepción de la jerarquía tiene su handler y su código HTTP.
-- `GET /ui-capables` declara `List<UICapable>` y `UIElementResponse` implementa
-  la interfaz.
+- `GET /ui-capables` declara `List<UICapable>`, lee de H2 e incluye tanto armas
+  como jugadores; `UIElementResponse` implementa la interfaz.
 - Los constructores vacíos de las entidades son `protected`; los de negocio
   siguen siendo públicos y sobrecargados.
 - La colección Insomnia permite reproducir el caso feliz y cada error, con los
@@ -222,4 +236,4 @@ cambiando el jugador objetivo.
 
 ## Entrega
 
-Link del commit del repositorio.
+[Commit exacto de la entrega](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/efc99909e57a71ddac1085397e9f6b5a0e0fd369).
