@@ -48,7 +48,7 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
   agregar `Jugador` con nombre y vida 100, repositorio y método para perder vida
   al recibir un disparo.
 - **Resultado:** jerarquía `Arma` con `SINGLE_TABLE`, `Jugador`, repositorios y
-  regla de daño en el dominio.
+  regla de daño validada en la capa service.
 
 ### 5. CRUD REST completo
 - **Prompt resumido:** implementar CRUD REST con controlador, servicios y
@@ -119,10 +119,19 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
   máxima del cargador y falla con `MunicionInsuficienteException` cuando no
   quedan repuestos.
 
+### 14. Correcciones del docente
+- **Prompt resumido:** mover validaciones y excepciones del dominio a la capa
+  service, ocultar `setVida`, `setMunicionActual` e `id`, hacer que `Jugador`
+  implemente `UICapable` y que `/ui-capables` lea de H2, actualizar el diagrama
+  Mermaid, completar el enlace del commit y corregir la ortografía de Insomnia.
+- **Resultado:** `ValidadorService` y `SimulacionService` contienen las reglas,
+  las entidades solo guardan estado, el endpoint de interfaz recorre la base con
+  armas y jugadores, y la documentación quedó alineada con el código.
+
 ## Verificación de calidad
 
 - `cd cs2 && ./mvnw clean compile` → `BUILD SUCCESS`.
-- `cd cs2 && ./mvnw test` → `BUILD SUCCESS` con 34 tests, 0 fallas.
+- `cd cs2 && ./mvnw test` → `BUILD SUCCESS` con 42 tests, 0 fallas.
 - Se verificaron por HTTP los 409 de munición insuficiente y jugador eliminado,
   además de la persistencia del blindaje después de una simulación.
 - Prueba manual con la aplicación en ejecución:

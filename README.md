@@ -21,10 +21,10 @@ mediante una **API REST** con **Spring Boot**.
 | Entidad `Jugador` con nombre y vida inicial 100 | Implementada en `domain/Jugador.java`, con `recibirDisparo(int)` y persistencia JPA. |
 | Entidad `Chaleco` con absorción de daño | Implementada en `domain/Chaleco.java`, asociada a `Jugador` con cascada JPA y durabilidad persistida. |
 | Repositorio JPA de `Jugador` | `repository/JugadorRepository.java`. |
-| Interfaz de dominio | `UICapable` (imagen, sonido, rango, velocidad) y `ArmaOfensiva` (daño). |
+| Interfaz de dominio | `UICapable` (imagen, sonido, rango, velocidad) y `ArmaOfensiva` (daño); `UICapable` la implementan armas y `Jugador`. |
 | CRUD REST de una familia | `ArmaCrudController`, `ArmaService`, `FusilService` y `GranadaService` con repositorios para el padre y dos hijas. |
 | Endpoint de simulación | `POST /simulacion/disparar` descuenta munición, aplica el chaleco y actualiza la vida. |
-| Reglas de negocio persistidas | Munición real, absorción del chaleco, vida mínima 0 y estado de muerte; cada disparo queda en `simulaciones`. |
+| Reglas de negocio persistidas | `ValidadorService` y `SimulacionService` validan munición, chaleco, vida mínima 0 y estado de muerte; cada disparo queda en `simulaciones`. |
 | Jerarquía de excepciones | `DomainException` + `DatosInvalidosException` + `RecursoNoEncontradoException` + `MunicionInsuficienteException` + `JugadorEliminadoException`. |
 | `@RestControllerAdvice` | `GlobalExceptionHandler` con respuestas HTTP específicas, incluidos los 409 de negocio. |
 | H2 lista para consola | URL fija `jdbc:h2:file:./data/cs2db;AUTO_SERVER=TRUE` y `/h2-console` habilitado. |
@@ -79,9 +79,11 @@ mmedina-tplp3-2026/
         │   │   │   ├── ArmaMapper.java
         │   │   │   ├── ArmaService.java
         │   │   │   ├── FusilService.java
-        │   │   │   ├── GranadaService.java
-        │   │   │   ├── JugadorService.java
-        │   │   │   └── SimulacionService.java
+         │   │   │   ├── GranadaService.java
+         │   │   │   ├── JugadorService.java
+         │   │   │   ├── SimulacionService.java
+         │   │   │   ├── UICapableService.java
+         │   │   │   └── ValidadorService.java
         │   │   └── rest/
         │   │       ├── advice/GlobalExceptionHandler.java
         │   │       ├── controller/
@@ -214,11 +216,14 @@ classDiagram
     class ArmaCrudController
     class JugadorController
     class SimulacionController
+    class UIController
     class ArmaService
     class FusilService
     class GranadaService
     class JugadorService
     class SimulacionService
+    class UICapableService
+    class ValidadorService
 
     class DomainException {
         <<abstract>>
@@ -243,6 +248,7 @@ classDiagram
     UICapable <|.. AWP
     UICapable <|.. Flash
     UICapable <|.. Granada
+    UICapable <|.. Jugador
     ArmaOfensiva <|.. ArmaDeFuego
     ArmaOfensiva <|.. Granada
 
@@ -267,6 +273,14 @@ classDiagram
     SimulacionService --> SimulacionRepository
     SimulacionService --> ArmaRepository
     SimulacionService --> JugadorRepository
+    UIController --> UICapableService
+    UICapableService --> ArmaRepository
+    UICapableService --> JugadorRepository
+    ArmaService --> ValidadorService
+    FusilService --> ValidadorService
+    GranadaService --> ValidadorService
+    JugadorService --> ValidadorService
+    SimulacionService --> ValidadorService
     GlobalExceptionHandler ..> DomainException
 ```
 
@@ -279,17 +293,24 @@ declara `@JsonTypeInfo` con la propiedad `tipoArma` y `@JsonSubTypes` para
 
 ## Reglas de negocio
 
-1. **Regla de munición:** cada disparo descuenta una bala de `municionActual`.
-   Si el cargador no tiene balas, el dominio lanza `MunicionInsuficienteException`
-   y la API responde 409. Recargar, en cualquiera de sus sobrecargas, consume un
-   cargador de repuesto; sin repuestos también se responde 409.
+Las validaciones, las reglas y las excepciones viven en la capa `service`
+(`ValidadorService` y `SimulacionService`). Las entidades solo guardan el estado
+encapsulado y responden a mensajes como `recibirDisparo()` o `recargar()`.
+
+1. **Regla de munición:** `SimulacionService` comprueba el cargador antes de
+   disparar; si no hay balas lanza `MunicionInsuficienteException` y la API
+   responde 409. Cada disparo consume una bala de `municionActual`. Recargar, en
+   cualquiera de sus sobrecargas, consume un cargador de repuesto; sin repuestos
+   `ValidadorService` también responde 409.
 2. **Regla del chaleco:** si el jugador tiene chaleco, absorbe el 50% del daño
    mientras le quede durabilidad. La durabilidad baja en la cantidad absorbida.
    El daño restante pasa a la vida.
 3. **Regla de daño:** la vida del jugador nunca puede quedar por debajo de cero.
 4. **Regla de estado:** si la vida llega a cero el jugador queda muerto y no
-   admite más disparos (`JugadorEliminadoException`, HTTP 409); cada disparo
-   actualiza al jugador, el arma y el chaleco, y se registra en `simulaciones`.
+   admite más disparos; `SimulacionService` lanza
+   `JugadorEliminadoException` (HTTP 409) antes de modificar el estado. Cada
+   disparo actualiza al jugador, el arma y el chaleco, y se registra en
+   `simulaciones`.
 
 ---
 
@@ -374,7 +395,7 @@ Archivo: `cs2/src/main/resources/application.properties`.
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/` | Saludo de prueba. |
-| GET | `/ui-capables` | Lista polimórfica de elementos `UICapable`. |
+| GET | `/ui-capables` | Lista polimórfica de armas y jugadores persistentes que implementan `UICapable`. |
 | GET | `/arma` | Crea un arma en memoria según `tipo` (sin persistir). |
 | GET | `/arma/accion` | Devuelve un arma, su recarga y detalle de tienda. |
 
@@ -623,13 +644,14 @@ classDiagram
 | `RecursoNoEncontradoException` | 404 Not Found | Id de arma, fusil, granada o jugador inexistente. |
 | `MunicionInsuficienteException` | 409 Conflict | El cargador no tiene balas o no quedan cargadores de repuesto. |
 | `JugadorEliminadoException` | 409 Conflict | Se intenta disparar a un jugador con vida 0. |
-| `DomainException` | 400 Bad Request | Cualquier otra excepción de dominio no especializada. |
-| `IllegalArgumentException` | 400 Bad Request | Invariantes heredados del dominio POO. |
+| `DomainException` | 400 Bad Request | Cualquier otra excepción de la jerarquía no especializada. |
 
 `GlobalExceptionHandler` devuelve siempre `timestamp`, `status`, `error`,
 `excepcion`, `mensaje` y `path`. El campo `excepcion` lleva el nombre simple de
 la clase lanzada, de modo que `MunicionInsuficienteException` y
-`JugadorEliminadoException` se distinguen aunque ambas respondan 409.
+`JugadorEliminadoException` se distinguen aunque ambas respondan 409. El handler
+de `IllegalArgumentException` queda como respaldo, pero las reglas de la API
+lanzan las excepciones de la jerarquía desde la capa service.
 
 ---
 
@@ -640,15 +662,17 @@ cd cs2
 ./mvnw test
 ```
 
-Resultado esperado: `BUILD SUCCESS` con 34 tests de:
+Resultado esperado: `BUILD SUCCESS` con 42 tests de:
 
 - arranque del contexto Spring,
-- invariantes del dominio de armas,
-- consumo de munición, recarga y cargadores de repuesto,
-- vida inicial, daño, muerte, absorción del chaleco e invalidaciones de `Jugador`,
+- validaciones de `ValidadorService` sobre armas, jugadores, chalecos y recarga,
+- estado inicial, herencia y mensajes del dominio de armas,
+- consumo de munición, sobrecarga de `recargar()` y cargadores de repuesto,
+- vida inicial, daño, muerte, absorción del chaleco y mensajes de `Jugador`,
+- excepciones 409 lanzadas por `SimulacionService` y `ValidadorService`,
 - persistencia real de la simulación, la munición y el blindaje (JPA + H2 en memoria para tests),
 - discriminador `tipoArma` en la creación y el listado de armas,
-- respuesta de `/ui-capables` con el contrato de `UICapable`,
+- respuesta de `/ui-capables` leyendo armas y jugadores desde H2,
 - cuerpo de error con el nombre de la excepción,
 - respuestas HTTP 400, 404 y 409.
 
@@ -767,22 +791,26 @@ cliente.
 rango y `mostrarEnUI()`. El endpoint de lectura es `GET /ui-capables`; el
 controller devuelve `List<UICapable>` y cada elemento es un `UIElementResponse`
 que implementa la interfaz, de modo que el contrato de retorno coincide con el
-tipo de dominio. Lo implementan `Fusil` y `AWP` desde la rama `ArmaDeFuego`, y
-`Flash` y `Granada` desde la rama `Arrojadiza`, así que el tipo de interfaz
-puede hablar con instancias de dos familias del modelo. `ArmaOfensiva` es el
-otro protocolo: expone `getDano()` y lo usa la simulación para aceptar armas que
-realmente infligen daño.
+tipo de dominio. `UICapableService` recorre las armas y los jugadores guardados
+en H2 y filtra los que implementan el protocolo. Lo implementan `Fusil` y `AWP`
+desde la rama `ArmaDeFuego`, `Flash` y `Granada` desde la rama `Arrojadiza`, y
+`Jugador` desde otra familia, así que el tipo de interfaz puede hablar con
+instancias distintas del modelo. `ArmaOfensiva` es el otro protocolo: expone
+`getDano()` y lo usa la simulación para aceptar armas que realmente infligen
+daño.
 
-**6. Ocultamiento e invariantes.** Las reglas numéricas viven en el dominio:
-`ArmaDeFuego.consumirMunicion()` y `recargar()` controlan balas, cargador y
-repuestos; `Jugador.recibirDisparo()` controla vida y muerte; `Chaleco.absorber()`
-controla durabilidad y absorción. Los DTO de entrada evitan que Jackson escriba
-directamente sobre las entidades. Los setters públicos validan rangos y rechazan
-valores negativos, y los campos son privados. JPA e Hibernate hidratan las filas
-por reflexión usando el constructor sin argumentos, no los setters de negocio.
-Un POST ilegal se rechaza antes de `save()`, por lo que la transacción no deja
-basura: la colección de Insomnia incluye el POST con precio negativo y un GET
-posterior para comparar el listado.
+**6. Ocultamiento e invariantes.** Los campos son privados y las reglas
+numéricas se validan en `ValidadorService` y `SimulacionService` antes de
+modificar el estado. Las entidades no lanzan excepciones: `ArmaDeFuego`
+descuenta balas en `disparar()` y `recargar()`, `Jugador` responde a
+`recibirDisparo()` y `Chaleco.absorber()` descuenta la durabilidad. `setVida`,
+`setMunicionActual` e `id` no tienen setters públicos: la vida y la munición se
+cambian con mensajes del juego y el id lo asigna la base. Los DTO de entrada
+evitan que Jackson escriba directamente sobre las entidades. JPA e Hibernate
+hidratan las filas por reflexión usando el constructor sin argumentos. Un POST
+ilegal se rechaza antes de `save()`, por lo que la transacción no deja basura:
+la colección de Insomnia incluye el POST con precio negativo y un GET posterior
+para comparar el listado.
 
 **7. PUT y PATCH.** La API usa `PUT` porque el proyecto ya tenía ese verbo y el
 enunciado acepta `PUT` o `PATCH`. La semántica implementada es de actualización
@@ -803,10 +831,11 @@ borrado y su efecto quedan documentados, no improvisados en el controller.
 `Simulacion`, `Chaleco` y todas las clases concretas tienen constructor sin
 argumentos con visibilidad `protected` para que JPA pueda instanciarlos sin
 exponerlos al cliente. Las clases concretas conservan constructores de negocio
-públicos y sobrecargados: uno simple que crea un objeto legal con valores por
-defecto y otro completo con todos los atributos. Hibernate usa el constructor
-vacío protegido y completa los campos privados por reflexión; el código de la
-aplicación usa los constructores de negocio y los setters validados.
+públicos y sobrecargados: uno simple que crea un objeto con valores por defecto
+y otro completo con todos los atributos. Hibernate usa el constructor vacío
+protegido y completa los campos privados por reflexión; el código de la
+aplicación usa los constructores de negocio y los servicios validan los datos
+antes de persistir.
 
 **10. Dos reglas y simulación.** La primera regla es de munición: cada disparo
 descuenta una bala y recargar consume un cargador de repuesto. La segunda es de
@@ -859,11 +888,13 @@ dialecto en `application.properties` y `pom.xml`. No cambian el dominio, los
 repositorios Spring Data, los controllers, los DTO ni las reglas de negocio; esa
 es la ventaja de mantener la persistencia detrás de interfaces.
 
-**16. ¿Quién lanza la excepción?** La lanza el objeto del dominio, no el
-controller. `ArmaDeFuego.consumirMunicion()` lanza
-`MunicionInsuficienteException`; `Jugador.recibirDisparo()` lanza
-`JugadorEliminadoException`. El servicio solo busca las entidades y coordina la
-transacción; el controller solo traduce HTTP.
+**16. ¿Quién lanza la excepción?** La lanza la capa service, no el dominio ni el
+controller. `ValidadorService` lanza `DatosInvalidosException` y
+`MunicionInsuficienteException` cuando los datos o la recarga no son válidos;
+`SimulacionService` lanza `MunicionInsuficienteException` y
+`JugadorEliminadoException` antes de pedirle a las entidades que cambien su
+estado. Las entidades solo guardan el estado encapsulado; el controller traduce
+HTTP.
 
 **17. ¿Por qué una entidad `Simulacion`?** Porque el jugador y el arma representan
 el estado actual, mientras que `Simulacion` conserva el historial auditable de
