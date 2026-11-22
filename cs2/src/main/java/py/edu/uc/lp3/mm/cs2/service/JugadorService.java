@@ -16,9 +16,11 @@ import py.edu.uc.lp3.mm.cs2.rest.dto.JugadorRequest;
 public class JugadorService {
 
     private final JugadorRepository jugadorRepository;
+    private final ValidadorService validadorService;
 
-    public JugadorService(JugadorRepository jugadorRepository) {
+    public JugadorService(JugadorRepository jugadorRepository, ValidadorService validadorService) {
         this.jugadorRepository = jugadorRepository;
+        this.validadorService = validadorService;
     }
 
     @Transactional(readOnly = true)
@@ -37,12 +39,10 @@ public class JugadorService {
         if (request == null) {
             throw new DatosInvalidosException("Debe indicar el nombre del jugador");
         }
-        try {
-            Chaleco chaleco = crearChaleco(request.blindaje());
-            return jugadorRepository.save(new Jugador(request.nombre(), Jugador.VIDA_INICIAL, chaleco));
-        } catch (IllegalArgumentException excepcion) {
-            throw new DatosInvalidosException(excepcion.getMessage(), excepcion);
-        }
+        Chaleco chaleco = crearChaleco(request.blindaje());
+        Jugador jugador = new Jugador(request.nombre(), Jugador.VIDA_INICIAL, chaleco);
+        validadorService.validarJugador(jugador);
+        return jugadorRepository.save(jugador);
     }
 
     @Transactional
@@ -54,6 +54,7 @@ public class JugadorService {
         if (request.blindaje() != null) {
             jugador.equiparChaleco(crearChaleco(request.blindaje()));
         }
+        validadorService.validarJugador(jugador);
         return jugadorRepository.save(jugador);
     }
 
@@ -61,6 +62,7 @@ public class JugadorService {
         if (blindaje == null || blindaje == 0) {
             return null;
         }
+        validadorService.validarChaleco(blindaje);
         return new Chaleco(blindaje);
     }
 

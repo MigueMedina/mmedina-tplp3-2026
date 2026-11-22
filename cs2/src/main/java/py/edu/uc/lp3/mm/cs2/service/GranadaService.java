@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import py.edu.uc.lp3.mm.cs2.domain.Granada;
-import py.edu.uc.lp3.mm.cs2.exception.DatosInvalidosException;
 import py.edu.uc.lp3.mm.cs2.exception.RecursoNoEncontradoException;
 import py.edu.uc.lp3.mm.cs2.repository.GranadaRepository;
 import py.edu.uc.lp3.mm.cs2.rest.dto.ArmaRequest;
@@ -15,9 +14,11 @@ import py.edu.uc.lp3.mm.cs2.rest.dto.ArmaRequest;
 public class GranadaService {
 
     private final GranadaRepository granadaRepository;
+    private final ValidadorService validadorService;
 
-    public GranadaService(GranadaRepository granadaRepository) {
+    public GranadaService(GranadaRepository granadaRepository, ValidadorService validadorService) {
         this.granadaRepository = granadaRepository;
+        this.validadorService = validadorService;
     }
 
     @Transactional(readOnly = true)
@@ -33,22 +34,17 @@ public class GranadaService {
 
     @Transactional
     public Granada crear(ArmaRequest request) {
-        try {
-            return granadaRepository.save(ArmaMapper.crearGranada(request));
-        } catch (IllegalArgumentException excepcion) {
-            throw new DatosInvalidosException(excepcion.getMessage(), excepcion);
-        }
+        Granada granada = ArmaMapper.crearGranada(request);
+        validadorService.validarArma(granada);
+        return granadaRepository.save(granada);
     }
 
     @Transactional
     public Granada actualizar(Integer id, ArmaRequest request) {
         Granada granada = buscar(id);
-        try {
-            ArmaMapper.aplicar(granada, request);
-            return granadaRepository.save(granada);
-        } catch (IllegalArgumentException excepcion) {
-            throw new DatosInvalidosException(excepcion.getMessage(), excepcion);
-        }
+        ArmaMapper.aplicar(granada, request);
+        validadorService.validarArma(granada);
+        return granadaRepository.save(granada);
     }
 
     @Transactional

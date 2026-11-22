@@ -28,23 +28,14 @@ public class Fusil extends ArmaDeFuego implements UICapable {
         this.silenciador = silenciador;
     }
 
-    // Getters y Setters (con invariantes)
     public boolean isAutomatica() { return automatica; }
     public void setAutomatica(boolean automatica) { this.automatica = automatica; }
 
     public int getMira() { return mira; }
-    public void setMira(int mira) {
-        if (mira < 0)
-            throw new IllegalArgumentException("La mira debe ser no negativa");
-        this.mira = mira;
-    }
+    public void setMira(int mira) { this.mira = mira; }
 
     public int getRetroceso() { return retroceso; }
-    public void setRetroceso(int retroceso) {
-        if (retroceso < 0)
-            throw new IllegalArgumentException("El retroceso debe ser no negativo");
-        this.retroceso = retroceso;
-    }
+    public void setRetroceso(int retroceso) { this.retroceso = retroceso; }
 
     public boolean isSilenciador() { return silenciador; }
     public void setSilenciador(boolean silenciador) { this.silenciador = silenciador; }

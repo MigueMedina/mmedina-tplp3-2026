@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import py.edu.uc.lp3.mm.cs2.domain.Fusil;
-import py.edu.uc.lp3.mm.cs2.exception.DatosInvalidosException;
 import py.edu.uc.lp3.mm.cs2.exception.RecursoNoEncontradoException;
 import py.edu.uc.lp3.mm.cs2.repository.FusilRepository;
 import py.edu.uc.lp3.mm.cs2.rest.dto.ArmaRequest;
@@ -15,9 +14,11 @@ import py.edu.uc.lp3.mm.cs2.rest.dto.ArmaRequest;
 public class FusilService {
 
     private final FusilRepository fusilRepository;
+    private final ValidadorService validadorService;
 
-    public FusilService(FusilRepository fusilRepository) {
+    public FusilService(FusilRepository fusilRepository, ValidadorService validadorService) {
         this.fusilRepository = fusilRepository;
+        this.validadorService = validadorService;
     }
 
     @Transactional(readOnly = true)
@@ -33,22 +34,17 @@ public class FusilService {
 
     @Transactional
     public Fusil crear(ArmaRequest request) {
-        try {
-            return fusilRepository.save(ArmaMapper.crearFusil(request));
-        } catch (IllegalArgumentException excepcion) {
-            throw new DatosInvalidosException(excepcion.getMessage(), excepcion);
-        }
+        Fusil fusil = ArmaMapper.crearFusil(request);
+        validadorService.validarArma(fusil);
+        return fusilRepository.save(fusil);
     }
 
     @Transactional
     public Fusil actualizar(Integer id, ArmaRequest request) {
         Fusil fusil = buscar(id);
-        try {
-            ArmaMapper.aplicar(fusil, request);
-            return fusilRepository.save(fusil);
-        } catch (IllegalArgumentException excepcion) {
-            throw new DatosInvalidosException(excepcion.getMessage(), excepcion);
-        }
+        ArmaMapper.aplicar(fusil, request);
+        validadorService.validarArma(fusil);
+        return fusilRepository.save(fusil);
     }
 
     @Transactional

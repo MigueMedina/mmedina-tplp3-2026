@@ -24,20 +24,11 @@ public class Flash extends Arrojadiza implements UICapable {
         setDuracionCeguera(duracionCeguera);
     }
 
-    // Getters y Setters (con invariantes)
     public int getIntensidad() { return intensidad; }
-    public void setIntensidad(int intensidad) {
-        if (intensidad < 0)
-            throw new IllegalArgumentException("La intensidad debe ser no negativa");
-        this.intensidad = intensidad;
-    }
+    public void setIntensidad(int intensidad) { this.intensidad = intensidad; }
 
     public double getDuracionCeguera() { return duracionCeguera; }
-    public void setDuracionCeguera(double duracionCeguera) {
-        if (duracionCeguera < 0)
-            throw new IllegalArgumentException("La duración de ceguera debe ser no negativa");
-        this.duracionCeguera = duracionCeguera;
-    }
+    public void setDuracionCeguera(double duracionCeguera) { this.duracionCeguera = duracionCeguera; }
 
     @Override
     public String disparar() {

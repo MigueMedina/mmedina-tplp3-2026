@@ -10,12 +10,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
-import py.edu.uc.lp3.mm.cs2.exception.DatosInvalidosException;
-import py.edu.uc.lp3.mm.cs2.exception.JugadorEliminadoException;
-
 @Entity
 @Table(name = "jugadores")
-public class Jugador {
+public class Jugador implements UICapable {
 
     public static final int VIDA_INICIAL = 100;
 
@@ -48,8 +45,8 @@ public class Jugador {
     }
 
     public Jugador(String nombre, int vida, Chaleco chaleco) {
-        setNombre(nombre);
-        setVida(vida);
+        this.nombre = nombre;
+        asignarVida(vida);
         this.chaleco = chaleco;
     }
 
@@ -62,9 +59,6 @@ public class Jugador {
     }
 
     public void setNombre(String nombre) {
-        if (nombre == null || nombre.isBlank()) {
-            throw new DatosInvalidosException("El nombre del jugador no puede estar vacío");
-        }
         this.nombre = nombre;
     }
 
@@ -72,10 +66,7 @@ public class Jugador {
         return vida;
     }
 
-    public void setVida(int vida) {
-        if (vida < 0 || vida > VIDA_INICIAL) {
-            throw new DatosInvalidosException("La vida del jugador debe estar entre 0 y " + VIDA_INICIAL);
-        }
+    private void asignarVida(int vida) {
         this.vida = vida;
         this.vivo = vida > 0;
     }
@@ -84,24 +75,14 @@ public class Jugador {
         return vivo;
     }
 
-    /**
-     * Regla de negocio: un jugador recibe el daño de un arma, su vida nunca
-     * baja de cero y queda marcado como muerto al llegar a cero.
-     *
-     * @return el daño efectivamente aplicado.
-     */
     public int recibirDisparo(int dano) {
         if (!vivo) {
-            throw new JugadorEliminadoException(
-                    "El jugador " + nombre + " ya está muerto y no puede recibir más disparos");
+            return 0;
         }
-        if (dano <= 0) {
-            throw new DatosInvalidosException("El arma debe infligir un daño mayor que cero");
-        }
-        int danoALaVida = chaleco == null ? dano : chaleco.absorber(dano);
+        int danoAplicado = Math.max(0, dano);
+        int danoALaVida = chaleco == null ? danoAplicado : chaleco.absorber(danoAplicado);
         int vidaAnterior = this.vida;
-        this.vida = Math.max(0, this.vida - danoALaVida);
-        this.vivo = this.vida > 0;
+        asignarVida(Math.max(0, this.vida - danoALaVida));
         return vidaAnterior - this.vida;
     }
 
@@ -114,7 +95,32 @@ public class Jugador {
     }
 
     public void revivir() {
-        this.vida = VIDA_INICIAL;
-        this.vivo = true;
+        asignarVida(VIDA_INICIAL);
+    }
+
+    @Override
+    public String getImagen() {
+        return "jugador_" + nombre.toLowerCase().replace(" ", "_") + ".png";
+    }
+
+    @Override
+    public String getSonido() {
+        return "jugador_impacto.ogg";
+    }
+
+    @Override
+    public double getVelocidadDisparo() {
+        return 0;
+    }
+
+    @Override
+    public double getRango() {
+        return 0;
+    }
+
+    @Override
+    public String mostrarEnUI() {
+        return "Jugador " + nombre + " con vida " + vida + "/" + VIDA_INICIAL
+                + (vivo ? " (vivo)" : " (eliminado)");
     }
 }

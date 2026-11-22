@@ -6,8 +6,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import py.edu.uc.lp3.mm.cs2.exception.DatosInvalidosException;
-
 @Entity
 @Table(name = "chalecos")
 public class Chaleco {
@@ -26,20 +24,14 @@ public class Chaleco {
     }
 
     public Chaleco(int durabilidad) {
-        if (durabilidad < 0 || durabilidad > DURABILIDAD_MAXIMA) {
-            throw new DatosInvalidosException(
-                    "La durabilidad del chaleco debe estar entre 0 y " + DURABILIDAD_MAXIMA);
-        }
         this.durabilidad = durabilidad;
     }
 
     public int absorber(int dano) {
-        if (dano < 0) {
-            throw new DatosInvalidosException("El daño no puede ser negativo");
-        }
-        int absorbido = Math.min((dano * PORCENTAJE_ABSORCION) / 100, durabilidad);
+        int danoSeguro = Math.max(0, dano);
+        int absorbido = Math.min((danoSeguro * PORCENTAJE_ABSORCION) / 100, durabilidad);
         this.durabilidad -= absorbido;
-        return dano - absorbido;
+        return danoSeguro - absorbido;
     }
 
     public Long getId() {

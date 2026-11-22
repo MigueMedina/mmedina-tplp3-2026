@@ -24,13 +24,8 @@ public class Granada extends Arrojadiza implements UICapable, ArmaOfensiva {
         this.aturdimiento = aturdimiento;
     }
 
-    // Getters y Setters (con invariantes)
     public int getDano() { return dano; }
-    public void setDano(int dano) {
-        if (dano < 0)
-            throw new IllegalArgumentException("El daño debe ser no negativo");
-        this.dano = dano;
-    }
+    public void setDano(int dano) { this.dano = dano; }
 
     public boolean isAturdimiento() { return aturdimiento; }
     public void setAturdimiento(boolean aturdimiento) { this.aturdimiento = aturdimiento; }

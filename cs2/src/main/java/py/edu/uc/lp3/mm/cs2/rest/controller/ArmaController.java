@@ -11,12 +11,19 @@ import py.edu.uc.lp3.mm.cs2.domain.Flash;
 import py.edu.uc.lp3.mm.cs2.domain.Fusil;
 import py.edu.uc.lp3.mm.cs2.domain.Granada;
 import py.edu.uc.lp3.mm.cs2.domain.Pistola;
+import py.edu.uc.lp3.mm.cs2.service.ArmaService;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 public class ArmaController {
+
+	private final ArmaService armaService;
+
+	public ArmaController(ArmaService armaService) {
+		this.armaService = armaService;
+	}
 
 	@GetMapping(ApiPaths.ARMA)
 	public Arma crearArma(
@@ -103,7 +110,7 @@ public class ArmaController {
 		}
 		Map<String, Object> resultado = new HashMap<>();
 		resultado.put("arma_generada", arma);
-		resultado.put("mensaje_recarga", arma.recargar());
+		resultado.put("mensaje_recarga", armaService.recargar(arma));
 		resultado.put("mensaje_tienda", arma.obtenerDetalleTienda());
 		return resultado;
 	}

@@ -6,10 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import py.edu.uc.lp3.mm.cs2.domain.Arma;
+import py.edu.uc.lp3.mm.cs2.domain.ArmaDeFuego;
 import py.edu.uc.lp3.mm.cs2.domain.ArmaOfensiva;
 import py.edu.uc.lp3.mm.cs2.domain.Jugador;
 import py.edu.uc.lp3.mm.cs2.domain.Simulacion;
 import py.edu.uc.lp3.mm.cs2.exception.DatosInvalidosException;
+import py.edu.uc.lp3.mm.cs2.exception.JugadorEliminadoException;
+import py.edu.uc.lp3.mm.cs2.exception.MunicionInsuficienteException;
 import py.edu.uc.lp3.mm.cs2.exception.RecursoNoEncontradoException;
 import py.edu.uc.lp3.mm.cs2.repository.ArmaRepository;
 import py.edu.uc.lp3.mm.cs2.repository.JugadorRepository;
@@ -23,20 +26,18 @@ public class SimulacionService {
     private final JugadorRepository jugadorRepository;
     private final ArmaRepository armaRepository;
     private final SimulacionRepository simulacionRepository;
+    private final ValidadorService validadorService;
 
     public SimulacionService(JugadorRepository jugadorRepository,
                              ArmaRepository armaRepository,
-                             SimulacionRepository simulacionRepository) {
+                             SimulacionRepository simulacionRepository,
+                             ValidadorService validadorService) {
         this.jugadorRepository = jugadorRepository;
         this.armaRepository = armaRepository;
         this.simulacionRepository = simulacionRepository;
+        this.validadorService = validadorService;
     }
 
-    /**
-     * Regla 1: el daño del arma reduce la vida del jugador sin bajar de cero.
-     * Regla 2: si la vida llega a cero el jugador queda muerto y no admite más
-     * disparos; cada disparo se guarda en el historial persistido.
-     */
     @Transactional
     public SimulacionResponse disparar(DisparoRequest request) {
         if (request == null || request.jugadorId() == null || request.armaId() == null) {
@@ -56,6 +57,18 @@ public class SimulacionService {
         }
 
         int dano = armaOfensiva.getDano();
+        validadorService.validarDano(dano);
+
+        if (!jugador.isVivo()) {
+            throw new JugadorEliminadoException(
+                    "El jugador " + jugador.getNombre() + " ya está muerto y no puede recibir más disparos");
+        }
+
+        if (arma instanceof ArmaDeFuego armaDeFuego && armaDeFuego.getMunicionActual() < 1) {
+            throw new MunicionInsuficienteException(
+                    arma.getNombre() + " no puede disparar: cargador insuficiente (0 balas, necesita 1)");
+        }
+
         int vidaAntes = jugador.getVida();
 
         arma.disparar();

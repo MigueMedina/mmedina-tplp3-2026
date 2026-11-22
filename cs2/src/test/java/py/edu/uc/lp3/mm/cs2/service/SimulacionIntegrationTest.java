@@ -2,6 +2,7 @@ package py.edu.uc.lp3.mm.cs2.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import py.edu.uc.lp3.mm.cs2.domain.Fusil;
+import py.edu.uc.lp3.mm.cs2.domain.Humo;
 import py.edu.uc.lp3.mm.cs2.domain.Jugador;
+import py.edu.uc.lp3.mm.cs2.exception.DatosInvalidosException;
+import py.edu.uc.lp3.mm.cs2.exception.JugadorEliminadoException;
+import py.edu.uc.lp3.mm.cs2.exception.MunicionInsuficienteException;
+import py.edu.uc.lp3.mm.cs2.repository.ArmaRepository;
 import py.edu.uc.lp3.mm.cs2.repository.FusilRepository;
 import py.edu.uc.lp3.mm.cs2.repository.JugadorRepository;
 import py.edu.uc.lp3.mm.cs2.repository.SimulacionRepository;
@@ -30,6 +36,9 @@ class SimulacionIntegrationTest {
 
     @Autowired
     private FusilRepository fusilRepository;
+
+    @Autowired
+    private ArmaRepository armaRepository;
 
     @Autowired
     private JugadorRepository jugadorRepository;
@@ -93,5 +102,40 @@ class SimulacionIntegrationTest {
         assertEquals(0, segundo.vidaDespues());
         assertFalse(segundo.vivo());
         assertEquals(2, simulacionRepository.count());
+    }
+
+    @Test
+    void dispararAUnJugadorEliminadoLanzaLaExcepcionDelServicio() {
+        Jugador jugador = jugadorService.crear(new JugadorRequest("Neo"));
+        jugador.recibirDisparo(Jugador.VIDA_INICIAL);
+        jugadorRepository.save(jugador);
+        Fusil fusil = fusilRepository.save(new Fusil(
+                "AK-47", 0, 2700, 36, 75, 2.5, 10, 30, true, 2, 20, false));
+
+        assertThrows(JugadorEliminadoException.class,
+                () -> simulacionService.disparar(new DisparoRequest(jugador.getId(), fusil.getId())));
+        assertEquals(0, simulacionRepository.count());
+    }
+
+    @Test
+    void dispararSinMunicionLanzaLaExcepcionDelServicio() {
+        Jugador jugador = jugadorService.crear(new JugadorRequest("Neo"));
+        Fusil fusil = new Fusil("AK-47", 0, 2700, 36, 75, 2.5, 10, 1, true, 2, 20, false);
+        fusil.disparar();
+        fusilRepository.save(fusil);
+
+        assertThrows(MunicionInsuficienteException.class,
+                () -> simulacionService.disparar(new DisparoRequest(jugador.getId(), fusil.getId())));
+        assertEquals(0, simulacionRepository.count());
+    }
+
+    @Test
+    void dispararConUnArmaNoOfensivaEsInvalido() {
+        Jugador jugador = jugadorService.crear(new JugadorRequest("Neo"));
+        var humo = armaRepository.save(new Humo("Smoke", 0, 300, "humo", 5, 20, 15, 0));
+
+        assertThrows(DatosInvalidosException.class,
+                () -> simulacionService.disparar(new DisparoRequest(jugador.getId(), humo.getId())));
+        assertEquals(0, simulacionRepository.count());
     }
 }

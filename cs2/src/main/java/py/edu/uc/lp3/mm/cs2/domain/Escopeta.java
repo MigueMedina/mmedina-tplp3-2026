@@ -24,20 +24,11 @@ public class Escopeta extends ArmaDeFuego {
         setDispersion(dispersion);
     }
 
-    // Getters y Setters (con invariantes)
     public int getPerdigon() { return perdigon; }
-    public void setPerdigon(int perdigon) {
-        if (perdigon < 0)
-            throw new IllegalArgumentException("La cantidad de perdigones debe ser no negativa");
-        this.perdigon = perdigon;
-    }
+    public void setPerdigon(int perdigon) { this.perdigon = perdigon; }
 
     public double getDispersion() { return dispersion; }
-    public void setDispersion(double dispersion) {
-        if (dispersion < 0)
-            throw new IllegalArgumentException("La dispersión debe ser no negativa");
-        this.dispersion = dispersion;
-    }
+    public void setDispersion(double dispersion) { this.dispersion = dispersion; }
 
     @Override
     public String disparar() {

@@ -2,13 +2,9 @@ package py.edu.uc.lp3.mm.cs2.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-
-import py.edu.uc.lp3.mm.cs2.exception.DatosInvalidosException;
-import py.edu.uc.lp3.mm.cs2.exception.JugadorEliminadoException;
 
 class JugadorDomainTest {
 
@@ -43,18 +39,22 @@ class JugadorDomainTest {
     }
 
     @Test
-    void noSePuedeDispararAUnJugadorMuerto() {
+    void unJugadorMuertoNoCambiaSuEstadoAlRecibirOtroDisparo() {
         Jugador jugador = new Jugador("Neo");
         jugador.recibirDisparo(100);
 
-        assertThrows(JugadorEliminadoException.class, () -> jugador.recibirDisparo(10));
+        assertEquals(0, jugador.recibirDisparo(10));
+        assertEquals(0, jugador.getVida());
+        assertFalse(jugador.isVivo());
     }
 
     @Test
-    void unDanoNoPositivoEsInvalido() {
+    void unDanoNoPositivoNoCambiaLaVida() {
         Jugador jugador = new Jugador("Neo");
 
-        assertThrows(DatosInvalidosException.class, () -> jugador.recibirDisparo(0));
+        assertEquals(0, jugador.recibirDisparo(0));
+        assertEquals(100, jugador.getVida());
+        assertTrue(jugador.isVivo());
     }
 
     @Test
@@ -80,8 +80,13 @@ class JugadorDomainTest {
     }
 
     @Test
-    void unChalecoConDurabilidadInvalidaEsRechazado() {
-        assertThrows(DatosInvalidosException.class, () -> new Chaleco(-1));
-        assertThrows(DatosInvalidosException.class, () -> new Chaleco(101));
+    void revivirRestauraLaVidaYElEstado() {
+        Jugador jugador = new Jugador("Neo");
+        jugador.recibirDisparo(100);
+
+        jugador.revivir();
+
+        assertEquals(100, jugador.getVida());
+        assertTrue(jugador.isVivo());
     }
 }

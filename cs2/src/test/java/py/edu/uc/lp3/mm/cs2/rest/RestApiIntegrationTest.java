@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import py.edu.uc.lp3.mm.cs2.domain.Flash;
 import py.edu.uc.lp3.mm.cs2.domain.Fusil;
 import py.edu.uc.lp3.mm.cs2.domain.Jugador;
 import py.edu.uc.lp3.mm.cs2.repository.ArmaRepository;
@@ -133,7 +134,7 @@ class RestApiIntegrationTest {
     void devuelve409CuandoElArmaNoTieneMunicion() throws Exception {
         Jugador jugador = jugadorRepository.save(new Jugador("Neo"));
         Fusil fusil = new Fusil("AK-47", 0, 2700, 36, 75, 2.5, 10, 1, true, 2, 20, false);
-        fusil.setMunicionActual(0);
+        fusil.disparar();
         fusil = fusilRepository.save(fusil);
 
         mockMvc.perform(post("/simulacion/disparar")
@@ -192,12 +193,20 @@ class RestApiIntegrationTest {
     }
 
     @Test
-    void listaElementosUICapables() throws Exception {
+    void listaElementosUICapablesDesdeLaBase() throws Exception {
+        armaRepository.save(new Fusil(
+                "AK-47", 0, 2700, 36, 75, 2.5, 10, 30, true, 2, 20, false));
+        armaRepository.save(new Flash(
+                "Flashbang", 0, 200, "flash", 5, 20, 2, 0.5, 90, 3.5));
+        jugadorRepository.save(new Jugador("Neo"));
+
         mockMvc.perform(get("/ui-capables"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].tipo").value("Fusil"))
                 .andExpect(jsonPath("$[0].imagen").exists())
                 .andExpect(jsonPath("$[0].mensaje").exists())
-                .andExpect(jsonPath("$[1].tipo").value("Flash"));
+                .andExpect(jsonPath("$[1].tipo").value("Flash"))
+                .andExpect(jsonPath("$[2].tipo").value("Jugador"))
+                .andExpect(jsonPath("$[2].mensaje").value("Jugador Neo con vida 100/100 (vivo)"));
     }
 }
