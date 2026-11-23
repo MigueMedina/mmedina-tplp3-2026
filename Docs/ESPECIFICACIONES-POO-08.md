@@ -236,4 +236,4 @@ cambiando el jugador objetivo.
 
 ## Entrega
 
-[Commit exacto de la entrega](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/efc99909e57a71ddac1085397e9f6b5a0e0fd369).
+[Commit exacto de cierre de observaciones](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/4d67d6db45af73423a9f19791ad4cb8700940213).
