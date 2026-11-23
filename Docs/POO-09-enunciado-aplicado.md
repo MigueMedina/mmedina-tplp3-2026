@@ -17,8 +17,8 @@
 
 La corrección de POO-08 tuvo observaciones y **todas están cerradas**. El detalle
 item por ítem está en `README.md`, sección «Estado de la corrección de POO-08».
-El commit evaluado de POO-08 es
-[`efc9990`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/efc99909e57a71ddac1085397e9f6b5a0e0fd369).
+El commit de cierre de observaciones de POO-08 es
+[`4d67d6d`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/4d67d6db45af73423a9f19791ad4cb8700940213).
 Por lo tanto, este ítem aporta los 3 puntos de POO-08 más los 12 del challenge.
 
 No se vuelve a aplicar la rúbrica de 24 de POO-08. La defensa oral es otro
@@ -40,6 +40,11 @@ Las rutas de los compañeros no están copiadas como constantes de dominio: se
 resuelven en tiempo de ejecución desde cada OpenAPI. Los `operationId`
 configurados por defecto son `validarMunicion` para A2 y `validarJugadorVivo`
 para A3; ambos se pueden cambiar por variable de entorno.
+
+Para que el grupo pueda rotar, este servicio publica sus dos reglas con esos
+mismos `operationId`: `GET /api/reglas`, `POST /api/reglas/municion` y
+`POST /api/reglas/jugador-vivo`. No usan repositorios ni escriben en H2. La
+ficha para quien nos consulte como A2 o A3 está en `Docs/PARA-COMPANEROS.md`.
 
 ## Escenario en una frase
 
@@ -213,7 +218,8 @@ bash ./mvnw clean test
 
 Cubren:
 
-- generación del documento OpenAPI y presencia de operaciones/errores;
+- generación del documento OpenAPI 3.0 y presencia de operaciones/errores;
+- consultas stateless de las dos reglas propias, con casos 200, 400 y 409;
 - resolución de rutas desde un `/v3/api-docs` simulado y uso de `servers`;
 - construcción del cliente por rol y conversión de rechazos;
 - escenario feliz y rechazos A2/A3 en el servicio, sin escrituras;
@@ -227,7 +233,6 @@ su propio hash, por lo que el README apunta al commit inmediatamente anterior al
 cierre documental.
 
 - Commit exacto de POO-08:
-  [`efc9990`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/efc99909e57a71ddac1085397e9f6b5a0e0fd369).
-- Commit exacto de POO-09: **se completa después de que el usuario ejecute el
-  commit final**; reemplazar `HASH_FINAL_PO09` en el README y pegar el mismo
-  enlace en Classroom.
+  [`4d67d6d`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/4d67d6db45af73423a9f19791ad4cb8700940213).
+- Commit exacto de POO-09:
+  [`992121d`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/992121d6805984ec26e544e138e5092c9ae07be5).

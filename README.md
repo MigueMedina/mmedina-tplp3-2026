@@ -42,16 +42,17 @@ La corrección de POO-08 **tuvo observaciones y todas están cerradas** en este
 repositorio. No se vuelve a aplicar la rúbrica de 24; este ítem aporta los 3
 puntos correspondientes a «observaciones cerradas».
 
-| Observación del docente | Cierre aplicado |
-|---|---|
-| Validaciones y excepciones dentro del dominio | Movidas a `ValidadorService` y `SimulacionService`; las entidades ya no lanzan excepciones. |
-| `setVida` público en `Jugador` | Reemplazado por asignación privada; la vida se modifica sólo con `recibirDisparo()`. |
-| `setMunicionActual` e `id` expuestos | Sin setters públicos; el id lo asigna H2 y la munición cambia con mensajes del dominio. |
-| `Jugador` no implementaba `UICapable` | Ahora implementa la interfaz y aparece en `/ui-capables`. |
-| `/ui-capables` no leía la base | `UICapableService` recorre `ArmaRepository` y `JugadorRepository`. |
-| Diagrama Mermaid desactualizado | Reescrito con dominio, repositorios, services, controllers, excepciones y jugadores. |
-| Enlace del commit sin completar | `Docs/ESPECIFICACIONES-POO-08.md` apunta al commit exacto de la corrección. |
-| Errores de ortografía en Insomnia | Corregidos `despues` → `después` y `vacio` → `vacío`. |
+| Observación del docente | Cierre aplicado | Commit |
+|---|---|---|
+| Validaciones y excepciones dentro del dominio | Movidas a `ValidadorService` y `SimulacionService`; las entidades ya no lanzan excepciones. | [`bd27f27`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/bd27f27b373aa44a5afceba6496b518581c59606) |
+| `setVida` público en `Jugador` | Reemplazado por asignación privada; la vida se modifica sólo con `recibirDisparo()`. | [`bd27f27`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/bd27f27b373aa44a5afceba6496b518581c59606) |
+| `setMunicionActual` e `id` expuestos | Sin setters públicos; el id lo asigna H2 y la munición cambia con mensajes del dominio. | [`bd27f27`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/bd27f27b373aa44a5afceba6496b518581c59606) |
+| `Jugador` no implementaba `UICapable` | Ahora implementa la interfaz y aparece en `/ui-capables`. | [`bd27f27`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/bd27f27b373aa44a5afceba6496b518581c59606) |
+| `/ui-capables` no leía la base | `UICapableService` recorre `ArmaRepository` y `JugadorRepository`. | [`bd27f27`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/bd27f27b373aa44a5afceba6496b518581c59606) |
+| Diagrama Mermaid desactualizado | Reescrito con dominio, repositorios, services, controllers, excepciones y jugadores. | [`3679ff2`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/3679ff24a8404e23833b7a1a280ef9d0922ded55) |
+| Enlace del commit sin completar | `Docs/ESPECIFICACIONES-POO-08.md` apunta al commit exacto de la corrección. | [`3679ff2`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/3679ff24a8404e23833b7a1a280ef9d0922ded55) |
+| README y bitácora alineadas con las reglas en service | Textos actualizados después del refactor. | [`7be5449`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/7be5449c624766232fb2564b2bffa1a87945f794) |
+| Errores de ortografía en Insomnia | Corregidos `despues` → `después` y `vacio` → `vacío`. | [`4d67d6d`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/4d67d6db45af73423a9f19791ad4cb8700940213) |
 
 **Convención del enlace exacto de POO-09:** un commit no puede contener su propio
 hash. El enlace de la solución se informa en Classroom y se replica en el README
@@ -82,6 +83,11 @@ Las rutas ajenas se resuelven en runtime desde el OpenAPI de cada compañero.
 Los `operationId` por defecto son `validarMunicion` (A2) y `validarJugadorVivo`
 (A3), configurables con `A2_OPERATION_ID` y `A3_OPERATION_ID`. El cliente lee
 también `servers[0].url` del documento y cachea la ruta por rol, operación y URL.
+
+Para poder rotar y atender consultas como A2 o A3, este servicio también publica
+sus dos reglas sin tocar H2: `GET /api/reglas`, `POST /api/reglas/municion` y
+`POST /api/reglas/jugador-vivo`. La ficha para compañeros está en
+`Docs/PARA-COMPANEROS.md`.
 
 El enunciado aplicado, el detalle de los 15 puntos y los diagramas de flujo están
 en `Docs/POO-09-enunciado-aplicado.md`.
@@ -475,6 +481,33 @@ java -jar target/cs2-0.0.1-SNAPSHOT.jar
 
 Detener con `Ctrl + C`.
 
+### Arrancar A1, A2 y A3
+
+A1 es este repositorio:
+
+```bash
+cd cs2
+bash ./mvnw spring-boot:run
+```
+
+A2 y A3 son repositorios de los compañeros. Cuando se confirme el grupo,
+reemplazar estos marcadores por los enlaces reales:
+
+```bash
+git clone <URL_REPO_A2> a2
+cd a2
+./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
+```
+
+```bash
+git clone <URL_REPO_A3> a3
+cd a3
+./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8082
+```
+
+Si los compañeros usan otros puertos, cambiar `A2_BASE_URL` y `A3_BASE_URL` en
+el arranque de A1.
+
 ---
 
 ## Configuración de H2
@@ -845,7 +878,7 @@ cd cs2
 bash ./mvnw clean test
 ```
 
-Resultado verificado: `BUILD SUCCESS` con 50 tests, 0 fallas y 0 errores:
+Resultado verificado: `BUILD SUCCESS` con 55 tests, 0 fallas y 0 errores:
 
 - arranque del contexto Spring,
 - validaciones de `ValidadorService` sobre armas, jugadores, chalecos y recarga,
@@ -855,6 +888,7 @@ Resultado verificado: `BUILD SUCCESS` con 50 tests, 0 fallas y 0 errores:
 - excepciones 409 lanzadas por `SimulacionService` y `ValidadorService`,
 - persistencia real de la simulación, la munición y el blindaje (JPA + H2 en memoria para tests),
 - discriminador `tipoArma` en la creación y el listado de armas,
+- consultas stateless de munición y jugador vivo, con casos 200, 400 y 409,
 - respuesta de `/ui-capables` leyendo armas y jugadores desde H2,
 - cuerpo de error con el nombre de la excepción,
 - respuestas HTTP 400, 404 y 409,
@@ -1118,12 +1152,11 @@ en `./data/cs2db`; la de tests se configura en
 
 ## Entrega POO-09
 
-- POO-08: commit exacto
-  [`efc9990`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/efc99909e57a71ddac1085397e9f6b5a0e0fd369).
+- POO-08: commit exacto de cierre de observaciones
+  [`4d67d6d`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/4d67d6db45af73423a9f19791ad4cb8700940213).
 - POO-09: enlace exacto al commit de la solución:
-  [commit `HASH_FINAL_PO09`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/HASH_FINAL_PO09).
+  [commit `992121d`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/992121d6805984ec26e544e138e5092c9ae07be5).
 
-Reemplazar `HASH_FINAL_PO09` por el hash real después de ejecutar el commit
-final, y pegar el mismo enlace en Classroom. Hasta ese momento el repositorio
-queda listo y sin commit automatizado, porque el usuario indicó que hará el
-commit y el push por su cuenta.
+El enlace apunta al commit inmediatamente anterior al cierre documental, siguiendo
+la convención de que un commit no puede contener su propio hash. El mismo enlace
+se informa en Classroom.
