@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "permitido": true,
+  "regla": "Un jugador con vida mayor que 0 sigue en juego; con vida 0 no recibe más disparos.",
+  "detalle": "El jugador sigue vivo y puede recibir el disparo",
+  "vida": 100,
+  "blindaje": 0
+}

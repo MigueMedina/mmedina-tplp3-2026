@@ -168,23 +168,50 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
 
 ### 19. Insomnia y enunciado aplicado
 - **Prompt resumido:** extender Insomnia con el mapa A1/A2/A3, OpenAPI propios y
-  ajenos, escenario feliz, rechazos por compañero y respuestas de ejemplo;
-  actualizar README, bitácora y documento aplicado para Classroom.
-- **Resultado:** carpeta `10 - POO-09 (APIs cruzadas)`,
-  `insomnia/respuestas/*.http`, `Docs/POO-09-enunciado-aplicado.md`, mapa y
-  preguntas del enunciado respondidas en el README.
+   ajenos, escenario feliz, rechazos por compañero y respuestas de ejemplo;
+   actualizar README, bitácora y documento aplicado para Classroom.
+ - **Resultado:** carpeta `10 - POO-09 (APIs cruzadas)`,
+   `insomnia/respuestas/*.http`, `Docs/POO-09-enunciado-aplicado.md`, mapa y
+   preguntas del enunciado respondidas en el README.
+
+### 20. Reglas propias publicadas para rotación
+ - **Prompt resumido:** publicar las dos reglas de A1 como consultas stateless,
+   con `GET /api/reglas` y dos POST con los mismos `operationId` que A2 y A3,
+   sin ids, repositorios ni escrituras en H2.
+ - **Resultado:** `ReglasService`, `ReglasController`, DTOs con `@Schema`, rutas
+   en `ApiPaths`, pruebas unitarias y HTTP, además de `Docs/PARA-COMPANEROS.md`
+   para que el grupo pueda consultarnos al rotar.
+
+### 21. Trazabilidad y cierre documental
+ - **Prompt resumido:** agregar la columna de commits exactos a las observaciones
+   cerradas de POO-08, enlazar la ficha de compañeros desde README y documento
+   aplicado, y fijar el hash final siguiendo la convención del commit anterior.
+ - **Resultado:** tabla POO-08 con hashes `bd27f27`, `3679ff2`, `7be5449` y
+   `4d67d6d`; README y `Docs/POO-09-enunciado-aplicado.md` apuntan a la ficha de
+   rotación; Classroom y el README usarán el último hash previo al cierre.
+
+### 22. OpenAPI 3.0 y colección ampliada
+ - **Prompt resumido:** fijar OpenAPI 3.0, desactivar respuestas genéricas,
+   documentar 400/409 por operación, agregar los casos de las reglas a Insomnia
+   y dejar `mvnw` ejecutable.
+ - **Resultado:** propiedades springdoc en configuración principal y de tests,
+   `OpenApiDocumentationTest` verifica versión 3.0 y los nuevos `operationId`,
+   Insomnia incluye casos felices y de error para ambas reglas, y `mvnw` pasó a
+   modo `100755`.
 
 ## Verificación de calidad
 
 
 - `cd cs2 && bash ./mvnw clean compile` → `BUILD SUCCESS`.
-- `cd cs2 && bash ./mvnw clean test` → `BUILD SUCCESS` con 50 tests, 0 fallas y
+- `cd cs2 && ./mvnw clean test` → `BUILD SUCCESS` con 55 tests, 0 fallas y
   0 errores.
 - Se verificaron por HTTP los 409 de munición insuficiente y jugador eliminado,
   además de la persistencia del blindaje después de una simulación.
-- Se verificaron el documento `/v3/api-docs`, la resolución de rutas desde un
-  OpenAPI simulado, el escenario feliz con relectura y los 409 atribuidos a A2 y
-  A3 sin escrituras en H2.
+- Se verificaron el documento `/v3/api-docs` en versión 3.0, la resolución de
+  rutas desde un OpenAPI simulado, el escenario feliz con relectura y los 409
+  atribuidos a A2 y A3 sin escrituras en H2.
+- Se verificaron por HTTP las consultas stateless de las dos reglas, con casos
+  200, 400 y 409, y que `GET /escenarios` no cambia después de consultarlas.
 - `python3 -m json.tool insomnia/cs2-insomnia.json` → JSON válido.
 - Prueba manual con la aplicación en ejecución:
   - `POST /jugadores` → 201 con vida 100.

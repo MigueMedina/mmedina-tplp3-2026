@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "municion": "Un arma de fuego dispara si el cargador tiene al menos una bala; sin balas no dispara.",
+  "vida": "Un jugador con vida mayor que 0 sigue en juego; con vida 0 no recibe más disparos."
+}

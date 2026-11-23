@@ -1,0 +1,7 @@
+HTTP/1.1 409 Conflict
+Content-Type: application/json
+
+{
+  "excepcion": "JugadorEliminadoException",
+  "mensaje": "El jugador ya fue eliminado: vida 0"
+}

@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "permitido": true,
+  "regla": "Un arma de fuego dispara si el cargador tiene al menos una bala; sin balas no dispara.",
+  "detalle": "Hay munición suficiente para un disparo",
+  "carga": 1,
+  "dano": 30
+}

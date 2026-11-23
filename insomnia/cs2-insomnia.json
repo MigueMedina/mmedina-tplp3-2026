@@ -1132,7 +1132,7 @@
       "modified": 1794314745865,
       "created": 1794314745865,
       "name": "10 - POO-09 (APIs cruzadas)",
-      "description": "OpenAPI propio y ajenos, escenario feliz y rechazos atribuidos a A2 y A3.",
+      "description": "OpenAPI propio y ajenos, reglas propias para rotación, escenario feliz y rechazos atribuidos a A2 y A3.",
       "environment": {},
       "environmentPropertyOrder": null,
       "metaSortKey": 10,
@@ -1337,6 +1337,238 @@
       "headers": [],
       "authentication": {},
       "metaSortKey": 7,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_reglas_resumen",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/reglas",
+      "name": "GET reglas propias (resumen)",
+      "description": "Muestra las dos reglas de A1 en una frase cada una; no consulta H2.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 8,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_reglas_municion_ok",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/reglas/municion",
+      "name": "Regla munición - caso aceptado",
+      "description": "Con carga 1 responde 200 y no escribe en H2.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"carga\": 1,\n  \"dano\": 30\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 9,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_reglas_municion_rechazo",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/reglas/municion",
+      "name": "Regla munición - caso rechazado (409)",
+      "description": "Con carga 0 responde 409 MunicionInsuficienteException sin tocar H2.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"carga\": 0,\n  \"dano\": 30\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 10,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_reglas_municion_invalida",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/reglas/municion",
+      "name": "Regla munición - dato inválido (400)",
+      "description": "Con carga negativa responde 400 DatosInvalidosException.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"carga\": -1,\n  \"dano\": 30\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 11,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_reglas_jugador_ok",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/reglas/jugador-vivo",
+      "name": "Regla jugador vivo - caso aceptado",
+      "description": "Con vida 100 responde 200 y no escribe en H2.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"vida\": 100,\n  \"blindaje\": 0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 12,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_reglas_jugador_rechazo",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/reglas/jugador-vivo",
+      "name": "Regla jugador vivo - caso rechazado (409)",
+      "description": "Con vida 0 responde 409 JugadorEliminadoException sin tocar H2.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"vida\": 0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 13,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_reglas_jugador_invalida",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/reglas/jugador-vivo",
+      "name": "Regla jugador vivo - dato inválido (400)",
+      "description": "Con vida 150 responde 400 DatosInvalidosException.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"vida\": 150,\n  \"blindaje\": 0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 14,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_escenarios_tras_reglas",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/escenarios",
+      "name": "GET escenarios (las reglas no escriben)",
+      "description": "Debe mostrar la misma cantidad que antes de consultar las reglas propias.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 15,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,

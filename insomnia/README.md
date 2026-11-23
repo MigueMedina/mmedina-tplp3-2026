@@ -10,7 +10,8 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
 3. Seleccionar `insomnia/cs2-insomnia.json`.
 4. Abrir el workspace **CS2 - TP LP3**.
 5. Revisar el environment **Base**.
-6. Arrancar la API con `cd cs2 && bash ./mvnw spring-boot:run`. Para POO-09
+6. Arrancar la API con `cd cs2 && ./mvnw spring-boot:run` (o
+   `bash ./mvnw spring-boot:run` si el wrapper no tiene permiso). Para POO-09
    arrancar también A2 en `http://localhost:8081` y A3 en `http://localhost:8082`
    (o cambiar `a2_base_url` y `a3_base_url`).
 7. Ejecutar las carpetas en el orden indicado más abajo. Cuando un POST devuelva
@@ -85,8 +86,14 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
     - **Rechazo de A3 (jugador eliminado)**. Debe responder `409` con
       `"rechazadoPor": "A3"`; el jugador eliminado se preparó en el paso 10.
     - **GET escenarios (comparar tras rechazo)**. Debe seguir igual.
-    - Abrir H2 y comprobar que `ESCENARIOS` y `SIMULACIONES` no crecieron con
-      los rechazos.
+     - Abrir H2 y comprobar que `ESCENARIOS` y `SIMULACIONES` no crecieron con
+       los rechazos.
+     - **GET reglas propias (resumen)**. Muestra las dos reglas de A1.
+     - **Regla munición - caso aceptado / rechazado (409) / dato inválido (400)**
+       y **Regla jugador vivo - caso aceptado / rechazado (409) / dato inválido
+       (400)**. Son consultas stateless: no cambian H2.
+     - **GET escenarios (las reglas no escriben)**. Debe repetir la cantidad
+       anterior.
 13. `09 - Limpieza (opcional)` → ejecutar los DELETE al final: **Eliminar arma**,
     **Eliminar fusil**, **Eliminar granada** y **Eliminar jugador**. Si
     `arma_id` y `fusil_id` apuntan al mismo recurso, el segundo DELETE responde
@@ -119,9 +126,10 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
 - **09 - Limpieza (opcional):** DELETE de arma, fusil, granada y jugador. Se
   ejecuta después de la simulación y de consultar H2 para no borrar los ids que
   usa la defensa.
-- **10 - POO-09 (APIs cruzadas):** OpenAPI de A1, A2 y A3; escenario feliz; GET
-  del escenario persistido; rechazos atribuidos a A2 y A3; GET de comparación.
-  Los ejemplos de respuesta están en `insomnia/respuestas/`.
+- **10 - POO-09 (APIs cruzadas):** OpenAPI de A1, A2 y A3; reglas propias para
+  rotación; escenario feliz; GET del escenario persistido; rechazos atribuidos a
+  A2 y A3; GET de comparación. Los ejemplos de respuesta están en
+  `insomnia/respuestas/`.
 
 ## Resultados esperados
 
