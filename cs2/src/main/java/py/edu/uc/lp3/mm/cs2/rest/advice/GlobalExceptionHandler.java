@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import py.edu.uc.lp3.mm.cs2.exception.CompanneroRechazoException;
 import py.edu.uc.lp3.mm.cs2.exception.DatosInvalidosException;
 import py.edu.uc.lp3.mm.cs2.exception.DomainException;
 import py.edu.uc.lp3.mm.cs2.exception.JugadorEliminadoException;
@@ -50,6 +51,17 @@ public class GlobalExceptionHandler {
     public Map<String, Object> manejarJugadorEliminado(JugadorEliminadoException excepcion,
                                                        HttpServletRequest request) {
         return respuesta(HttpStatus.CONFLICT, excepcion, request);
+    }
+
+    @ExceptionHandler(CompanneroRechazoException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, Object> manejarRechazoDeCompanero(CompanneroRechazoException excepcion,
+                                                         HttpServletRequest request) {
+        Map<String, Object> respuesta = respuesta(HttpStatus.CONFLICT, excepcion, request);
+        respuesta.put("rechazadoPor", excepcion.getRechazadoPor().getEtiqueta());
+        respuesta.put("statusRemoto", excepcion.getStatusRemoto());
+        respuesta.put("cuerpoRemoto", excepcion.getCuerpoRemoto());
+        return respuesta;
     }
 
     @ExceptionHandler(DomainException.class)
