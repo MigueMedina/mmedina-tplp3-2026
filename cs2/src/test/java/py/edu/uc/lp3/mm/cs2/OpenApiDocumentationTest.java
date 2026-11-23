@@ -1,6 +1,5 @@
 package py.edu.uc.lp3.mm.cs2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -22,12 +21,19 @@ class OpenApiDocumentationTest {
                 .retrieve()
                 .body(String.class);
 
-        assertEquals(true, documento != null && documento.contains("\"openapi\""));
+        assertTrue(documento != null);
+        assertTrue(documento.matches("(?s).*\"openapi\"\\s*:\\s*\"3\\.0\\.[0-9]+\".*"));
         assertTrue(documento.contains("/armas"));
         assertTrue(documento.contains("/jugadores"));
         assertTrue(documento.contains("/simulacion/disparar"));
+        assertTrue(documento.contains("/escenarios/disparo-coordinado"));
+        assertTrue(documento.contains("/api/reglas"));
+        assertTrue(documento.contains("/api/reglas/municion"));
+        assertTrue(documento.contains("/api/reglas/jugador-vivo"));
         assertTrue(documento.contains("MunicionInsuficienteException"));
         assertTrue(documento.contains("JugadorEliminadoException"));
         assertTrue(documento.contains("simularDisparo"));
+        assertTrue(documento.contains("validarMunicion"));
+        assertTrue(documento.contains("validarJugadorVivo"));
     }
 }
