@@ -176,7 +176,7 @@ cambiando el jugador objetivo.
 
    ```bash
    cd cs2
-   ./mvnw spring-boot:run
+   bash ./mvnw spring-boot:run
    ```
 
 2. Abrir la consola H2 en `http://localhost:8080/h2-console` con la URL
@@ -213,7 +213,7 @@ cambiando el jugador objetivo.
 
    ```bash
    cd cs2
-   ./mvnw test
+   bash ./mvnw test
    ```
 
 ## Criterios de aceptación

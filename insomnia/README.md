@@ -10,7 +10,9 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
 3. Seleccionar `insomnia/cs2-insomnia.json`.
 4. Abrir el workspace **CS2 - TP LP3**.
 5. Revisar el environment **Base**.
-6. Arrancar la API con `cd cs2 && ./mvnw spring-boot:run`.
+6. Arrancar la API con `cd cs2 && bash ./mvnw spring-boot:run`. Para POO-09
+   arrancar también A2 en `http://localhost:8081` y A3 en `http://localhost:8082`
+   (o cambiar `a2_base_url` y `a3_base_url`).
 7. Ejecutar las carpetas en el orden indicado más abajo. Cuando un POST devuelva
    un `id`, copiarlo en la variable de environment correspondiente. La carpeta
    `09 - Limpieza` se ejecuta recién al final, después de simular y revisar H2.
@@ -27,6 +29,12 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
 | `arma_sin_municion_id` | Id del fusil con `capacidadCargador: 0` para provocar el 409 de munición. |
 | `jugador_mortal_id` | Id del jugador que se elimina para provocar el 409 de jugador eliminado. |
 | `arma_letal_id` | Id del AWP con daño 115 usado para eliminar al jugador de prueba. |
+| `a1_base_url` | URL de A1, por defecto `http://localhost:8080`. |
+| `a2_base_url` | URL base de A2, por defecto `http://localhost:8081`. |
+| `a3_base_url` | URL base de A3, por defecto `http://localhost:8082`. |
+| `a2_openapi` | Documento OpenAPI de A2; se usa `http://localhost:8081/v3/api-docs`. |
+| `a3_openapi` | Documento OpenAPI de A3; se usa `http://localhost:8082/v3/api-docs`. |
+| `escenario_id` | Id devuelto por el escenario feliz, para volver a leerlo. |
 
 ## Orden sugerido para la defensa
 
@@ -62,7 +70,24 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
       incluir `"excepcion": "JugadorEliminadoException"`.
 11. Abrir `http://localhost:8080/h2-console` y consultar `ARMAS`, `JUGADORES`,
     `CHALECOS` y `SIMULACIONES`.
-12. `09 - Limpieza (opcional)` → ejecutar los DELETE al final: **Eliminar arma**,
+12. `10 - POO-09 (APIs cruzadas)` → ejecutar en este orden:
+    - **OpenAPI A1 (propio)**, **OpenAPI A2** y **OpenAPI A3**. Confirmar que
+      los tres exponen `/v3/api-docs`.
+    - **Escenario feliz (A2 y A3 aceptan)**. Debe responder `201`; copiar el
+      `id` devuelto en `escenario_id`.
+    - **GET escenario persistido**. Debe devolver `200` con las aprobaciones
+      `a2` y `a3`.
+    - **GET escenarios (comparar tras rechazo)**. Anotar la cantidad actual.
+    - **Rechazo de A2 (munición)**. Debe responder `409` con
+      `"rechazadoPor": "A2"` y `statusRemoto: 409`.
+    - **GET escenarios (comparar tras rechazo)**. Debe mostrar la misma
+      cantidad que antes del rechazo.
+    - **Rechazo de A3 (jugador eliminado)**. Debe responder `409` con
+      `"rechazadoPor": "A3"`; el jugador eliminado se preparó en el paso 10.
+    - **GET escenarios (comparar tras rechazo)**. Debe seguir igual.
+    - Abrir H2 y comprobar que `ESCENARIOS` y `SIMULACIONES` no crecieron con
+      los rechazos.
+13. `09 - Limpieza (opcional)` → ejecutar los DELETE al final: **Eliminar arma**,
     **Eliminar fusil**, **Eliminar granada** y **Eliminar jugador**. Si
     `arma_id` y `fusil_id` apuntan al mismo recurso, el segundo DELETE responde
     `404`; es el resultado esperado de haber borrado dos veces el mismo id.
@@ -94,6 +119,9 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
 - **09 - Limpieza (opcional):** DELETE de arma, fusil, granada y jugador. Se
   ejecuta después de la simulación y de consultar H2 para no borrar los ids que
   usa la defensa.
+- **10 - POO-09 (APIs cruzadas):** OpenAPI de A1, A2 y A3; escenario feliz; GET
+  del escenario persistido; rechazos atribuidos a A2 y A3; GET de comparación.
+  Los ejemplos de respuesta están en `insomnia/respuestas/`.
 
 ## Resultados esperados
 
@@ -108,3 +136,7 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
   `granada`, etc.) para distinguir el subtipo.
 - Los DELETE de `09 - Limpieza` responden `204`; si se repite el mismo id, el
   segundo intento responde `404`.
+- `/v3/api-docs` responde `200` en A1, A2 y A3.
+- El escenario feliz responde `201` e incluye `a2.status` y `a3.status` en `200`.
+- Los rechazos de compañero responden `409` con `rechazadoPor` igual a `A2` o
+  `A3`; `ESCENARIOS` y `SIMULACIONES` no crecen.

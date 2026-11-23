@@ -9,7 +9,7 @@ mediante una **API REST** con **Spring Boot**.
 - **Java:** 21
 - **Spring Boot:** 4.1.1
 - **Base de datos:** H2 persistente en archivo
-- **Build:** Maven Wrapper (`./mvnw`, no hace falta instalar Maven)
+- **Build:** Maven Wrapper (`bash ./mvnw`, no hace falta instalar Maven)
 
 ---
 
@@ -29,6 +29,75 @@ mediante una **API REST** con **Spring Boot**.
 | `@RestControllerAdvice` | `GlobalExceptionHandler` con respuestas HTTP específicas, incluidos los 409 de negocio. |
 | H2 lista para consola | URL fija `jdbc:h2:file:./data/cs2db;AUTO_SERVER=TRUE` y `/h2-console` habilitado. |
 | Documentación | Este README, `BITACORA.md`, `Docs/ESPECIFICACIONES-POO-08.md` y colección de Insomnia. |
+| OpenAPI propio | `/v3/api-docs` y `/swagger-ui.html` documentan CRUD, simulación, reglas y errores 400/404/409. |
+| Clientes A2/A3 | `OpenApiOperationResolver` lee el OpenAPI ajeno y `CompaneroClient` resuelve y cachea la ruta para cada `operationId`. |
+| Escenario persistido | `POST /escenarios/disparo-coordinado` exige dos aprobaciones y guarda `EscenarioCoordinado` en H2. |
+| Atribución de rechazo | `409` con `rechazadoPor`, `statusRemoto` y `cuerpoRemoto`; la base queda igual. |
+
+---
+
+## Estado de la corrección de POO-08
+
+La corrección de POO-08 **tuvo observaciones y todas están cerradas** en este
+repositorio. No se vuelve a aplicar la rúbrica de 24; este ítem aporta los 3
+puntos correspondientes a «observaciones cerradas».
+
+| Observación del docente | Cierre aplicado |
+|---|---|
+| Validaciones y excepciones dentro del dominio | Movidas a `ValidadorService` y `SimulacionService`; las entidades ya no lanzan excepciones. |
+| `setVida` público en `Jugador` | Reemplazado por asignación privada; la vida se modifica sólo con `recibirDisparo()`. |
+| `setMunicionActual` e `id` expuestos | Sin setters públicos; el id lo asigna H2 y la munición cambia con mensajes del dominio. |
+| `Jugador` no implementaba `UICapable` | Ahora implementa la interfaz y aparece en `/ui-capables`. |
+| `/ui-capables` no leía la base | `UICapableService` recorre `ArmaRepository` y `JugadorRepository`. |
+| Diagrama Mermaid desactualizado | Reescrito con dominio, repositorios, services, controllers, excepciones y jugadores. |
+| Enlace del commit sin completar | `Docs/ESPECIFICACIONES-POO-08.md` apunta al commit exacto de la corrección. |
+| Errores de ortografía en Insomnia | Corregidos `despues` → `después` y `vacio` → `vacío`. |
+
+**Convención del enlace exacto de POO-09:** un commit no puede contener su propio
+hash. El enlace de la solución se informa en Classroom y se replica en el README
+apuntando al commit inmediatamente anterior al cierre documental; así el hash
+publicado es verificable y no hay autorreferencia imposible.
+
+---
+
+## POO-09 — APIs cruzadas
+
+Este repositorio es **A1**. A2 y A3 son los dos compañeros CS2 acordados; hasta
+que se confirme el grupo, sus datos quedan como placeholders y se reemplazan con
+variables de entorno sin tocar código.
+
+| Rol | Dueño | URL base | OpenAPI | Regla que aporta |
+|---|---|---|---|---|
+| A1 | Este repo | `http://localhost:8080` | `http://localhost:8080/v3/api-docs` | Orquesta y persiste el escenario. |
+| A2 | Pendiente de grupo CS2 | `A2_BASE_URL` / `http://localhost:8081` | `A2_OPENAPI_URL` / `http://localhost:8081/v3/api-docs` | Valida munición suficiente. |
+| A3 | Pendiente de grupo CS2 | `A3_BASE_URL` / `http://localhost:8082` | `A3_OPENAPI_URL` / `http://localhost:8082/v3/api-docs` | Valida que el jugador esté vivo. |
+
+**Escenario en una frase:** `POST /escenarios/disparo-coordinado` recibe
+`{"jugadorId":1,"armaId":1}`, consulta A2 y A3 en ese orden y, sólo si los dos
+aceptan, dispara y guarda en H2 la simulación junto con ambas aprobaciones. Un
+`GET /escenarios/{id}` vuelve a leer la jugada. Si A2 o A3 rechazan, responde
+`409` con `rechazadoPor` y ni `ESCENARIOS` ni `SIMULACIONES` cambian.
+
+Las rutas ajenas se resuelven en runtime desde el OpenAPI de cada compañero.
+Los `operationId` por defecto son `validarMunicion` (A2) y `validarJugadorVivo`
+(A3), configurables con `A2_OPERATION_ID` y `A3_OPERATION_ID`. El cliente lee
+también `servers[0].url` del documento y cachea la ruta por rol, operación y URL.
+
+El enunciado aplicado, el detalle de los 15 puntos y los diagramas de flujo están
+en `Docs/POO-09-enunciado-aplicado.md`.
+
+### Preguntas que pide el enunciado
+
+- **OpenAPI:** vive en `/v3/api-docs` y se prueba en `/swagger-ui.html`. Incluye
+  CRUD, simulación, escenario y errores 400/404/409 con descripciones y ejemplos.
+- **Grupo:** A1 es este servicio; A2 y A3 se completan con los compañeros CS2.
+  La tabla anterior registra URLs y reglas en una frase.
+- **Escenario:** necesita munición (A2) y jugador vivo (A3) para que el disparo
+  sea legal; el éxito se ve en `/escenarios` y en H2.
+- **Cliente:** las URLs y los `operationId` se configuran por propiedades o
+  variables de entorno; la ruta se lee del OpenAPI ajeno.
+- **Errores:** se traducen a `CompanneroRechazoException`, se propician el
+  código y cuerpo remotos, y el handler distingue `A2` de `A3`.
 
 ---
 
@@ -40,10 +109,15 @@ mmedina-tplp3-2026/
 ├── BITACORA.md
 ├── insomnia/
 │   ├── cs2-insomnia.json
-│   └── README.md
+│   ├── README.md
+│   └── respuestas/
+│       ├── escenario-feliz.http
+│       ├── rechazo-a2.http
+│       └── rechazo-a3.http
 ├── Docs/
 │   ├── diagramamermaid.md
-│   └── ESPECIFICACIONES-POO-08.md
+│   ├── ESPECIFICACIONES-POO-08.md
+│   └── POO-09-enunciado-aplicado.md
 └── cs2/
     ├── pom.xml
     ├── mvnw / mvnw.cmd
@@ -52,6 +126,14 @@ mmedina-tplp3-2026/
         │   ├── java/py/edu/uc/lp3/mm/cs2/
         │   │   ├── Cs2Application.java
         │   │   ├── constants/ApiPaths.java
+        │   │   ├── client/
+        │   │   │   ├── ApiClientesProperties.java
+        │   │   │   ├── ClientHttpConfig.java
+        │   │   │   ├── CompaneroClient.java
+        │   │   │   ├── OpenApiOperationResolver.java
+        │   │   │   ├── ReglaRequest.java
+        │   │   │   ├── RespuestaCompanero.java
+        │   │   │   └── RolCompanero.java
         │   │   ├── domain/
         │   │   │   ├── Arma.java                 (@Entity, raíz SINGLE_TABLE)
         │   │   │   ├── ArmaDeFuego.java          (abstracta)
@@ -62,19 +144,22 @@ mmedina-tplp3-2026/
         │   │   │   ├── Flash.java / Humo.java / Granada.java
         │   │   │   ├── Jugador.java              (@Entity)
         │   │   │   ├── Chaleco.java              (@Entity, absorción de daño)
-        │   │   │   └── Simulacion.java           (@Entity, historial de disparos)
+        │   │   │   ├── Simulacion.java           (@Entity, historial de disparos)
+        │   │   │   └── EscenarioCoordinado.java  (@Entity, escenario POO-09)
         │   │   ├── exception/
         │   │   │   ├── DomainException.java
         │   │   │   ├── DatosInvalidosException.java
         │   │   │   ├── RecursoNoEncontradoException.java
         │   │   │   ├── MunicionInsuficienteException.java
-        │   │   │   └── JugadorEliminadoException.java
+        │   │   │   ├── JugadorEliminadoException.java
+        │   │   │   └── CompanneroRechazoException.java
         │   │   ├── repository/
         │   │   │   ├── ArmaRepository.java
         │   │   │   ├── FusilRepository.java
         │   │   │   ├── GranadaRepository.java
         │   │   │   ├── JugadorRepository.java
-        │   │   │   └── SimulacionRepository.java
+        │   │   │   ├── SimulacionRepository.java
+        │   │   │   └── EscenarioRepository.java
         │   │   ├── service/
         │   │   │   ├── ArmaMapper.java
         │   │   │   ├── ArmaService.java
@@ -83,7 +168,8 @@ mmedina-tplp3-2026/
          │   │   │   ├── JugadorService.java
          │   │   │   ├── SimulacionService.java
          │   │   │   ├── UICapableService.java
-         │   │   │   └── ValidadorService.java
+         │   │   │   ├── ValidadorService.java
+        │   │   │   └── EscenarioService.java
         │   │   └── rest/
         │   │       ├── advice/GlobalExceptionHandler.java
         │   │       ├── controller/
@@ -92,13 +178,16 @@ mmedina-tplp3-2026/
         │   │       │   ├── JugadorController.java
         │   │       │   ├── SimulacionController.java
         │   │       │   ├── UIController.java
-        │   │       │   └── IndexController.java
+        │   │       │   ├── IndexController.java
+        │   │       │   └── EscenarioController.java
         │   │       ├── dto/
         │   │       │   ├── ArmaRequest.java
         │   │       │   ├── DisparoRequest.java
         │   │       │   ├── JugadorRequest.java
         │   │       │   ├── JugadorResponse.java
-        │   │       │   └── SimulacionResponse.java
+        │   │       │   ├── SimulacionResponse.java
+        │   │       │   ├── EscenarioRequest.java
+        │   │       │   └── EscenarioResponse.java
         │   │       └── response/UIElementResponse.java
         │   └── resources/application.properties
         └── test/
@@ -203,6 +292,17 @@ classDiagram
         -LocalDateTime fecha
     }
 
+    class EscenarioCoordinado {
+        <<@Entity>>
+        -Long id
+        -Simulacion simulacion
+        -int a2Status
+        -int a3Status
+        -String a2Operacion
+        -String a3Operacion
+        -LocalDateTime fecha
+    }
+
     class ArmaRepository {
         <<interface>>
         +findAllByOrderByIdAsc()
@@ -212,11 +312,13 @@ classDiagram
     class GranadaRepository { <<interface>> }
     class JugadorRepository { <<interface>> }
     class SimulacionRepository { <<interface>> }
+    class EscenarioRepository { <<interface>> }
 
     class ArmaCrudController
     class JugadorController
     class SimulacionController
     class UIController
+    class EscenarioController
     class ArmaService
     class FusilService
     class GranadaService
@@ -224,6 +326,15 @@ classDiagram
     class SimulacionService
     class UICapableService
     class ValidadorService
+    class EscenarioService
+
+    class RolCompanero {
+        <<enumeration>>
+        A2
+        A3
+    }
+    class OpenApiOperationResolver
+    class CompaneroClient
 
     class DomainException {
         <<abstract>>
@@ -232,6 +343,7 @@ classDiagram
     class RecursoNoEncontradoException
     class MunicionInsuficienteException
     class JugadorEliminadoException
+    class CompanneroRechazoException
     class GlobalExceptionHandler
 
     Arma <|-- ArmaDeFuego
@@ -282,6 +394,17 @@ classDiagram
     JugadorService --> ValidadorService
     SimulacionService --> ValidadorService
     GlobalExceptionHandler ..> DomainException
+
+    Simulacion "1" --> "0..1" EscenarioCoordinado : se registra en
+    EscenarioController --> EscenarioService
+    EscenarioService --> EscenarioRepository
+    EscenarioService --> SimulacionService
+    EscenarioService --> CompaneroClient
+    CompaneroClient --> OpenApiOperationResolver
+    CompaneroClient --> RolCompanero
+    DomainException <|-- CompanneroRechazoException
+    EscenarioService ..> CompanneroRechazoException
+    GlobalExceptionHandler ..> CompanneroRechazoException
 ```
 
 La jerarquía de armas usa `@Inheritance(strategy = InheritanceType.SINGLE_TABLE)`,
@@ -332,13 +455,13 @@ cd cs2
 Compilar:
 
 ```bash
-./mvnw clean compile
+bash ./mvnw clean compile
 ```
 
 Ejecutar la aplicación:
 
 ```bash
-./mvnw spring-boot:run
+bash ./mvnw spring-boot:run
 ```
 
 La API queda en `http://localhost:8080`.
@@ -346,7 +469,7 @@ La API queda en `http://localhost:8080`.
 Alternativa con JAR:
 
 ```bash
-./mvnw clean package
+bash ./mvnw clean package
 java -jar target/cs2-0.0.1-SNAPSHOT.jar
 ```
 
@@ -385,6 +508,23 @@ Archivo: `cs2/src/main/resources/application.properties`.
 4. Verificar las tablas `ARMAS`, `JUGADORES`, `CHALECOS` y `SIMULACIONES`.
 
 > La carpeta `data/` se ignora en Git porque contiene la base local.
+
+### Configuración de APIs cruzadas
+
+| Propiedad / variable | Valor por defecto | Explicación |
+|---|---|---|
+| `apis.a2.base-url` / `A2_BASE_URL` | `http://localhost:8081` | URL base de A2. |
+| `apis.a2.openapi-url` / `A2_OPENAPI_URL` | *(vacía)* | Si está vacía se deriva `/v3/api-docs`. |
+| `apis.a2.operation-id` / `A2_OPERATION_ID` | `validarMunicion` | Operación buscada en el OpenAPI de A2. |
+| `apis.a3.base-url` / `A3_BASE_URL` | `http://localhost:8082` | URL base de A3. |
+| `apis.a3.openapi-url` / `A3_OPENAPI_URL` | *(vacía)* | Si está vacía se deriva `/v3/api-docs`. |
+| `apis.a3.operation-id` / `A3_OPERATION_ID` | `validarJugadorVivo` | Operación buscada en el OpenAPI de A3. |
+| `springdoc.api-docs.path` | `/v3/api-docs` | Documento OpenAPI propio. |
+| `springdoc.swagger-ui.path` | `/swagger-ui.html` | Swagger UI propio. |
+
+Los nombres de los campos del JSON enviado a A2/A3 también son configurables
+con `apis.a2.request.*` y `apis.a3.request.*`, para adaptarse al cuerpo que
+publique cada compañero sin modificar Java.
 
 ---
 
@@ -436,6 +576,34 @@ Archivo: `cs2/src/main/resources/application.properties`.
 | POST | `/simulacion/disparar` | Dispara un arma a un jugador. | 201 / 400 / 404 / 409 |
 | GET | `/simulacion/historial` | Historial completo persistido. | 200 |
 | GET | `/simulacion/historial/jugador/{jugadorId}` | Historial de un jugador. | 200 / 404 |
+
+### APIs cruzadas y escenario POO-09
+
+| Método | Ruta | Descripción | Código esperado |
+|---|---|---|---|
+| GET | `/v3/api-docs` | Documento OpenAPI 3 de A1. | 200 |
+| GET | `/swagger-ui.html` | Swagger UI para importar/probar el contrato. | 200 |
+| POST | `/escenarios/disparo-coordinado` | Consulta A2 y A3; si ambas aceptan, dispara y persiste el escenario. | 201 / 400 / 404 / 409 |
+| GET | `/escenarios` | Lista los escenarios aceptados y persistidos. | 200 |
+| GET | `/escenarios/{id}` | Busca un escenario por id. | 200 / 404 |
+
+Body del escenario:
+
+```json
+{"jugadorId":1,"armaId":1}
+```
+
+Respuesta de rechazo de un compañero:
+
+```json
+{
+  "excepcion": "CompanneroRechazoException",
+  "mensaje": "Rechazo de A3 (HTTP 409)",
+  "rechazadoPor": "A3",
+  "statusRemoto": 409,
+  "cuerpoRemoto": "{\"excepcion\":\"JugadorEliminadoException\"}"
+}
+```
 
 ---
 
@@ -532,6 +700,17 @@ curl http://localhost:8080/simulacion/historial
 curl http://localhost:8080/simulacion/historial/jugador/1
 ```
 
+### Escenario coordinado con A2 y A3
+
+```bash
+curl -X POST http://localhost:8080/escenarios/disparo-coordinado \
+  -H "Content-Type: application/json" \
+  -d '{"jugadorId":1,"armaId":1}'
+
+curl http://localhost:8080/escenarios
+curl http://localhost:8080/escenarios/1
+```
+
 ### Endpoint de la interfaz
 
 ```bash
@@ -625,6 +804,7 @@ classDiagram
     class RecursoNoEncontradoException
     class MunicionInsuficienteException
     class JugadorEliminadoException
+    class CompanneroRechazoException
     class GlobalExceptionHandler
 
     RuntimeException <|-- DomainException
@@ -632,10 +812,12 @@ classDiagram
     DomainException <|-- RecursoNoEncontradoException
     DomainException <|-- MunicionInsuficienteException
     DomainException <|-- JugadorEliminadoException
+    DomainException <|-- CompanneroRechazoException
     GlobalExceptionHandler ..> DatosInvalidosException : 400
     GlobalExceptionHandler ..> RecursoNoEncontradoException : 404
     GlobalExceptionHandler ..> MunicionInsuficienteException : 409
     GlobalExceptionHandler ..> JugadorEliminadoException : 409
+    GlobalExceptionHandler ..> CompanneroRechazoException : 409
 ```
 
 | Excepción | HTTP | Cuándo se usa |
@@ -644,6 +826,7 @@ classDiagram
 | `RecursoNoEncontradoException` | 404 Not Found | Id de arma, fusil, granada o jugador inexistente. |
 | `MunicionInsuficienteException` | 409 Conflict | El cargador no tiene balas o no quedan cargadores de repuesto. |
 | `JugadorEliminadoException` | 409 Conflict | Se intenta disparar a un jugador con vida 0. |
+| `CompanneroRechazoException` | 409 Conflict | A2 o A3 rechazó el escenario; `rechazadoPor` distingue el origen. |
 | `DomainException` | 400 Bad Request | Cualquier otra excepción de la jerarquía no especializada. |
 
 `GlobalExceptionHandler` devuelve siempre `timestamp`, `status`, `error`,
@@ -659,10 +842,10 @@ lanzan las excepciones de la jerarquía desde la capa service.
 
 ```bash
 cd cs2
-./mvnw test
+bash ./mvnw clean test
 ```
 
-Resultado esperado: `BUILD SUCCESS` con 42 tests de:
+Resultado verificado: `BUILD SUCCESS` con 50 tests, 0 fallas y 0 errores:
 
 - arranque del contexto Spring,
 - validaciones de `ValidadorService` sobre armas, jugadores, chalecos y recarga,
@@ -674,7 +857,11 @@ Resultado esperado: `BUILD SUCCESS` con 42 tests de:
 - discriminador `tipoArma` en la creación y el listado de armas,
 - respuesta de `/ui-capables` leyendo armas y jugadores desde H2,
 - cuerpo de error con el nombre de la excepción,
-- respuestas HTTP 400, 404 y 409.
+- respuestas HTTP 400, 404 y 409,
+- generación del OpenAPI y presencia de paths, `operationId` y errores,
+- resolución de rutas desde un OpenAPI simulado y uso de `servers`,
+- escenario feliz y rechazos A2/A3 sin escrituras en H2,
+- endpoint HTTP del escenario con relectura y 409 con `rechazadoPor`.
 
 Los tests usan `cs2/src/test/resources/application.properties` con una base H2
 en memoria para no ensuciar la base de desarrollo.
@@ -685,8 +872,13 @@ en memoria para no ensuciar la base de desarrollo.
 
 Con la aplicación en ejecución:
 
-- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+El documento describe el CRUD, la simulación, las dos reglas de POO-08, el
+escenario de POO-09 y sus errores. Las operaciones llevan `operationId`
+estable y las respuestas 400/404/409 incluyen ejemplos de las excepciones,
+para que un compañero pueda importar el contrato sin abrir el código Java.
 
 ---
 
@@ -702,27 +894,31 @@ Para importarla:
 3. Seleccionar `insomnia/cs2-insomnia.json`.
 4. Elegir el workspace **CS2 - TP LP3**.
 5. Verificar el environment **Base**:
-   - `base_url`: `http://localhost:8080`
+   - `base_url` / `a1_base_url`: `http://localhost:8080`
+   - `a2_base_url` y `a3_base_url`: `http://localhost:8081` y `http://localhost:8082`.
+   - `a2_openapi` y `a3_openapi`: documentos `/v3/api-docs` de los compañeros.
    - `jugador_id`, `arma_id`, `fusil_id`, `granada_id`: ids de prueba.
    - `arma_sin_municion_id`, `jugador_mortal_id`, `arma_letal_id`: ids que se
      copian de los POST de preparación de los casos 409.
-6. Arrancar la aplicación y ejecutar las carpetas en orden:
-   `Armas`, `Fusiles`, `Granadas`, `Jugadores`, `Simulación`, `Interface`,
-   `Excepciones` y, por último, `Limpieza` para los DELETE.
+6. Arrancar A1, A2 y A3 y ejecutar las carpetas en orden: `Armas`, `Fusiles`,
+   `Granadas`, `Jugadores`, `Simulación`, `Interface`, `Excepciones`,
+   `10 - POO-09 (APIs cruzadas)` y, por último, `Limpieza` para los DELETE.
 7. Después de cada POST de creación, copiar el `id` devuelto en la variable de
    environment que corresponda. No ejecutar los DELETE antes de la simulación
-   porque eliminan los recursos usados como ejemplo.
+   ni del escenario porque eliminan los recursos usados como ejemplo.
 
 La colección incluye el CRUD completo, un POST ilegal seguido de un GET para
 comprobar que la colección no creció, una consulta de id inexistente, el
 endpoint `/ui-capables`, la simulación con disparo al jugador, un pedido para
 `MunicionInsuficienteException` (409), otro para `JugadorEliminadoException`
-(409) y los POST de preparación necesarios para reproducir ambos estados. Los
-DELETE están agrupados en `09 - Limpieza` para ejecutarlos después de la
-simulación y de la revisión en H2.
+(409) y los POST de preparación necesarios para reproducir ambos estados. La
+carpeta `10 - POO-09 (APIs cruzadas)` agrega los OpenAPI de A1/A2/A3, el
+escenario feliz, su relectura, los rechazos de A2 y A3 y el GET de comparación.
+Los DELETE están agrupados en `09 - Limpieza`.
 
-El recorrido completo y el orden de las excepciones están detallados en
-`insomnia/README.md`.
+Las respuestas de ejemplo del feliz y de cada rechazo están en
+`insomnia/respuestas/`. El recorrido completo y el orden de las excepciones
+están detallados en `insomnia/README.md`.
 
 ---
 
@@ -917,3 +1113,17 @@ en `./data/cs2db`; la de tests se configura en
   usarse en `/simulacion/disparar` (responden 400).
 - Si se modifica el esquema y H2 queda inconsistente, detener la aplicación y
   borrar la carpeta `cs2/data/` para recrear la base.
+
+---
+
+## Entrega POO-09
+
+- POO-08: commit exacto
+  [`efc9990`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/efc99909e57a71ddac1085397e9f6b5a0e0fd369).
+- POO-09: enlace exacto al commit de la solución:
+  [commit `HASH_FINAL_PO09`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/HASH_FINAL_PO09).
+
+Reemplazar `HASH_FINAL_PO09` por el hash real después de ejecutar el commit
+final, y pegar el mismo enlace en Classroom. Hasta ese momento el repositorio
+queda listo y sin commit automatizado, porque el usuario indicó que hará el
+commit y el push por su cuenta.

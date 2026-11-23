@@ -1,0 +1,33 @@
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "id": 1,
+  "simulacion": {
+    "id": 1,
+    "jugadorId": 1,
+    "jugador": "Neo",
+    "vidaAntes": 100,
+    "vidaDespues": 64,
+    "danoAplicado": 36,
+    "vivo": true,
+    "armaId": 1,
+    "arma": "AK-47",
+    "tipoArma": "fusil",
+    "dano": 36,
+    "fecha": "2026-11-22T17:47:36.881"
+  },
+  "a2": {
+    "companero": "A2",
+    "status": 200,
+    "cuerpo": "{\"aprobado\":true}",
+    "operacion": "POST /reglas/municion/validar"
+  },
+  "a3": {
+    "companero": "A3",
+    "status": 200,
+    "cuerpo": "{\"aprobado\":true}",
+    "operacion": "POST /reglas/jugadores/validar-vivo"
+  },
+  "fecha": "2026-11-22T17:47:36.881"
+}

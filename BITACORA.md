@@ -24,6 +24,9 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
 - Jerarquía de excepciones de dominio y `GlobalExceptionHandler`.
 - Configuración de H2 persistente y consola web.
 - Actualización de README, pruebas y colección de Insomnia.
+- Publicación de OpenAPI con springdoc y anotaciones en controladores y DTO.
+- Clientes HTTP hacia A2 y A3 con resolución de rutas desde OpenAPI en runtime.
+- Escenario persistido con doble aprobación y rechazos atribuidos por compañero.
 
 ## Resumen de prompts relevantes
 
@@ -128,12 +131,61 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
   las entidades solo guardan estado, el endpoint de interfaz recorre la base con
   armas y jugadores, y la documentación quedó alineada con el código.
 
+### 15. Análisis del enunciado de POO-09 y plan de acción
+- **Prompt resumido:** analizar el challenge de APIs cruzadas, el mapa A1/A2/A3,
+  el ejemplo de UNO, la calificación de 15 puntos y el estado actual del repo,
+  y proponer un plan antes de escribir código.
+- **Resultado:** se confirmó que se trabaja en `mmedina-tplp3-2026`, que POO-08
+  tiene observaciones cerradas, que A2 y A3 se completarán con placeholders
+  hasta acordar el grupo CS2, que el hash exacto se publicará en Classroom y se
+   replicará en el README con la convención del commit anterior, y que los
+   clientes resolverán las rutas leyendo el OpenAPI en tiempo de ejecución.
+
+### 16. OpenAPI propio y documentación de errores
+- **Prompt resumido:** publicar OpenAPI 3 en Spring Boot, anotar controladores y
+  DTO, documentar CRUD, simulación, reglas y respuestas 400/404/409, y agregar
+  una prueba que lea `/v3/api-docs`.
+- **Resultado:** springdoc 3.2.1, `/v3/api-docs` y `/swagger-ui.html`,
+  `@OpenAPIDefinition`, `@Tag`, `@Operation`, `@ApiResponses` y `@Schema`;
+  `OpenApiDocumentationTest` verifica paths, `operationId` y textos de error.
+
+### 17. Clientes hacia A2 y A3
+- **Prompt resumido:** implementar clientes HTTP configurables que consulten el
+  OpenAPI de cada compañero, resuelvan la ruta por `operationId`, usen posibles
+  `servers`, cacheen el resultado y atribuyan los rechazos al compañero.
+- **Resultado:** paquete `client` con `OpenApiOperationResolver`,
+  `CompaneroClient`, `ApiClientesProperties`, `ClientHttpConfig`, `RolCompanero`
+  y DTO de regla/respuesta; `CompaneroClientTest` valida la resolución y el
+  rechazo de A3.
+
+### 18. Escenario persistido con doble aprobación
+- **Prompt resumido:** crear un endpoint propio que consulte A2 y A3, guarde la
+  jugada en H2 sólo si ambos aceptan, permita volver a leerla con GET y devuelva
+  un 409 que diga quién rechazó sin modificar la base.
+- **Resultado:** `EscenarioCoordinado`, `EscenarioRepository`,
+  `EscenarioService`, `EscenarioController`, `CompanneroRechazoException`,
+  handler 409 y pruebas de servicio y HTTP para feliz, rechazo A2 y rechazo A3.
+
+### 19. Insomnia y enunciado aplicado
+- **Prompt resumido:** extender Insomnia con el mapa A1/A2/A3, OpenAPI propios y
+  ajenos, escenario feliz, rechazos por compañero y respuestas de ejemplo;
+  actualizar README, bitácora y documento aplicado para Classroom.
+- **Resultado:** carpeta `10 - POO-09 (APIs cruzadas)`,
+  `insomnia/respuestas/*.http`, `Docs/POO-09-enunciado-aplicado.md`, mapa y
+  preguntas del enunciado respondidas en el README.
+
 ## Verificación de calidad
 
-- `cd cs2 && ./mvnw clean compile` → `BUILD SUCCESS`.
-- `cd cs2 && ./mvnw test` → `BUILD SUCCESS` con 42 tests, 0 fallas.
+
+- `cd cs2 && bash ./mvnw clean compile` → `BUILD SUCCESS`.
+- `cd cs2 && bash ./mvnw clean test` → `BUILD SUCCESS` con 50 tests, 0 fallas y
+  0 errores.
 - Se verificaron por HTTP los 409 de munición insuficiente y jugador eliminado,
   además de la persistencia del blindaje después de una simulación.
+- Se verificaron el documento `/v3/api-docs`, la resolución de rutas desde un
+  OpenAPI simulado, el escenario feliz con relectura y los 409 atribuidos a A2 y
+  A3 sin escrituras en H2.
+- `python3 -m json.tool insomnia/cs2-insomnia.json` → JSON válido.
 - Prueba manual con la aplicación en ejecución:
   - `POST /jugadores` → 201 con vida 100.
   - `POST /armas/fusiles` → 201.
