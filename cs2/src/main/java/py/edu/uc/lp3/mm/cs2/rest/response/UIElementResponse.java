@@ -1,7 +1,10 @@
 package py.edu.uc.lp3.mm.cs2.rest.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import py.edu.uc.lp3.mm.cs2.domain.UICapable;
 
+@Schema(description = "Representación polimórfica de un elemento con interfaz de usuario.")
 public record UIElementResponse(
 		String tipo,
 		String imagen,

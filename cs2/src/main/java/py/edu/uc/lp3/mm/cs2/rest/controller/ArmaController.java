@@ -4,6 +4,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import py.edu.uc.lp3.mm.cs2.constants.ApiPaths;
 import py.edu.uc.lp3.mm.cs2.domain.AWP;
 import py.edu.uc.lp3.mm.cs2.domain.Arma;
@@ -17,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@Tag(name = "POO legacy", description = "Endpoints de demostración de POO que no persisten datos.")
 public class ArmaController {
 
 	private final ArmaService armaService;
@@ -26,6 +30,7 @@ public class ArmaController {
 	}
 
 	@GetMapping(ApiPaths.ARMA)
+	@Operation(operationId = "demoCrearArma", summary = "Construir un arma en memoria (demo POO)")
 	public Arma crearArma(
 			@RequestParam(defaultValue = "pistola") String tipo,
 			@RequestParam(defaultValue = "Arma") String nombre,
@@ -69,6 +74,7 @@ public class ArmaController {
 	}
 
 	@GetMapping(ApiPaths.ARMA_ACCION)
+	@Operation(operationId = "demoAccionArma", summary = "Construir un arma y mostrar recarga y tienda (demo POO)")
 	public Map<String, Object> accionArma(
 			@RequestParam(defaultValue = "pistola") String tipo,
 			@RequestParam(defaultValue = "Arma") String nombre,
