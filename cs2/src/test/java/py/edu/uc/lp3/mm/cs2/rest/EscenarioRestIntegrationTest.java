@@ -24,6 +24,7 @@ import py.edu.uc.lp3.mm.cs2.client.RolCompanero;
 import py.edu.uc.lp3.mm.cs2.domain.Fusil;
 import py.edu.uc.lp3.mm.cs2.domain.Jugador;
 import py.edu.uc.lp3.mm.cs2.exception.CompanneroRechazoException;
+import py.edu.uc.lp3.mm.cs2.exception.CompaneroNoDisponibleException;
 import py.edu.uc.lp3.mm.cs2.repository.FusilRepository;
 import py.edu.uc.lp3.mm.cs2.repository.JugadorRepository;
 import py.edu.uc.lp3.mm.cs2.repository.SimulacionRepository;
@@ -82,7 +83,7 @@ class EscenarioRestIntegrationTest {
         Fusil fusil = fusilRepository.save(new Fusil(
                 "AK-47", 0, 2700, 36, 75, 2.5, 10, 30, true, 2, 20, false));
         when(companeroClient.validar(eq(RolCompanero.A2), any(ReglaRequest.class)))
-                .thenReturn(new RespuestaCompanero(RolCompanero.A2, 200, "{\"aprobado\":true}", "POST /r/a2"));
+                .thenReturn(new RespuestaCompanero(RolCompanero.A2, 200, "{\"permitido\":true}", "POST /r/a2"));
         when(companeroClient.validar(eq(RolCompanero.A3), any(ReglaRequest.class)))
                 .thenThrow(new CompanneroRechazoException(
                         RolCompanero.A3, 409, "{\"excepcion\":\"JugadorEliminadoException\"}"));
@@ -95,7 +96,10 @@ class EscenarioRestIntegrationTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.excepcion").value("CompanneroRechazoException"))
                 .andExpect(jsonPath("$.rechazadoPor").value("A3"))
-                .andExpect(jsonPath("$.statusRemoto").value(409));
+                .andExpect(jsonPath("$.statusRemoto").value(409))
+                .andExpect(jsonPath("$.statusHttp").value(409))
+                .andExpect(jsonPath("$.cuerpoRemoto").value("{\"excepcion\":\"JugadorEliminadoException\"}"))
+                .andExpect(jsonPath("$.traceId").exists());
 
         mockMvc.perform(get("/escenarios"))
                 .andExpect(status().isOk())
@@ -105,11 +109,49 @@ class EscenarioRestIntegrationTest {
                 fusilRepository.findById(fusil.getId()).orElseThrow().getMunicionActual());
     }
 
+    @Test
+    void validaElCuerpoAntesDeLlamarAlServicio() throws Exception {
+        mockMvc.perform(post("/escenarios/disparo-coordinado")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"armaId\":1}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.excepcion").value("MethodArgumentNotValidException"))
+                .andExpect(jsonPath("$.mensaje").value(org.hamcrest.Matchers.containsString("jugadorId")))
+                .andExpect(jsonPath("$.campo").value("jugadorId"))
+                .andExpect(jsonPath("$.errores.jugadorId").exists())
+                .andExpect(jsonPath("$.traceId").exists());
+    }
+
+    @Test
+    void unCompaneroNoDisponibleResponde502YNoEscribe() throws Exception {
+        Long jugadorId = jugadorRepository.save(new Jugador("Neo")).getId();
+        Fusil fusil = fusilRepository.save(new Fusil(
+                "AK-47", 0, 2700, 36, 75, 2.5, 10, 30, true, 2, 20, false));
+        when(companeroClient.validar(eq(RolCompanero.A2), any(ReglaRequest.class)))
+                .thenThrow(new CompaneroNoDisponibleException(RolCompanero.A2, 502, 503,
+                        "No se pudo consultar a A2", "A2 no responde", null));
+
+        mockMvc.perform(post("/escenarios/disparo-coordinado")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"jugadorId":%d,"armaId":%d}
+                                """.formatted(jugadorId, fusil.getId())))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.excepcion").value("CompaneroNoDisponibleException"))
+                .andExpect(jsonPath("$.rechazadoPor").value("A2"))
+                .andExpect(jsonPath("$.statusRemoto").value(503))
+                .andExpect(jsonPath("$.statusHttp").value(502))
+                .andExpect(jsonPath("$.cuerpoRemoto").value("A2 no responde"))
+                .andExpect(jsonPath("$.traceId").exists());
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, simulacionRepository.count());
+    }
+
     private void aprobaciones() {
         when(companeroClient.validar(eq(RolCompanero.A2), any(ReglaRequest.class)))
-                .thenReturn(new RespuestaCompanero(RolCompanero.A2, 200, "{\"aprobado\":true}", "POST /r/a2"));
+                .thenReturn(new RespuestaCompanero(RolCompanero.A2, 200, "{\"permitido\":true}", "POST /r/a2"));
         when(companeroClient.validar(eq(RolCompanero.A3), any(ReglaRequest.class)))
-                .thenReturn(new RespuestaCompanero(RolCompanero.A3, 200, "{\"aprobado\":true}", "POST /r/a3"));
+                .thenReturn(new RespuestaCompanero(RolCompanero.A3, 200, "{\"permitido\":true}", "POST /r/a3"));
     }
 
     private Long extraerId(String json) {

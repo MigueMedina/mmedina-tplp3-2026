@@ -14,10 +14,10 @@ public record EscenarioResponse(
         Aprobacion a3,
         LocalDateTime fecha) {
 
-    public static EscenarioResponse desde(EscenarioCoordinado entidad, SimulacionResponse simulacion) {
+    public static EscenarioResponse desde(EscenarioCoordinado entidad) {
         return new EscenarioResponse(
                 entidad.getId(),
-                simulacion,
+                SimulacionResponse.desde(entidad.getSimulacion()),
                 new Aprobacion("A2", entidad.getA2Status(), entidad.getA2Cuerpo(), entidad.getA2Operacion()),
                 new Aprobacion("A3", entidad.getA3Status(), entidad.getA3Cuerpo(), entidad.getA3Operacion()),
                 entidad.getFecha());
