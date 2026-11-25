@@ -1,0 +1,18 @@
+{
+  "nombre": "04-alias-municion-a1",
+  "fecha": "2026-11-25T10:09:26-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8080/api/companeros/municion",
+  "cuerpoEnviado": {
+    "carga": 30,
+    "dano": 36
+  },
+  "statusHttp": 200,
+  "respuesta": {
+    "permitido": true,
+    "regla": "Un arma de fuego dispara si el cargador tiene al menos una bala; sin balas no dispara.",
+    "detalle": "Hay munición suficiente para un disparo",
+    "carga": 30,
+    "dano": 36
+  }
+}

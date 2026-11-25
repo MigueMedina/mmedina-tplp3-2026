@@ -1132,7 +1132,7 @@
       "modified": 1794314745865,
       "created": 1794314745865,
       "name": "10 - POO-09 (APIs cruzadas)",
-      "description": "OpenAPI propio y ajenos, reglas propias para rotación, escenario feliz y rechazos atribuidos a A2 y A3.",
+      "description": "Catálogo y aliases de operationId, OpenAPI propio y ajenos, reglas para rotación, escenario feliz idempotente y rechazos atribuidos. La evidencia real se regenera con insomnia/capturar-respuestas.sh y se guarda en insomnia/respuestas/capturas/.",
       "environment": {},
       "environmentPropertyOrder": null,
       "metaSortKey": 10,
@@ -1167,8 +1167,8 @@
       "modified": 1794314745865,
       "created": 1794314745865,
       "url": "{{ _.a2_openapi }}",
-      "name": "OpenAPI A2",
-      "description": "Primero se lee el documento del compañero; la ruta se resuelve por operationId.",
+      "name": "OpenAPI A2 (Fabricio)",
+      "description": "Primero se lee el documento de Fabricio; la ruta se resuelve por operationId \"municion\".",
       "method": "GET",
       "body": {},
       "parameters": [],
@@ -1190,8 +1190,8 @@
       "modified": 1794314745865,
       "created": 1794314745865,
       "url": "{{ _.a3_openapi }}",
-      "name": "OpenAPI A3",
-      "description": "Segundo documento ajeno; A1 lo consulta antes de persistir.",
+      "name": "OpenAPI A3 (Joaquín)",
+      "description": "Segundo documento ajeno; A1 resuelve la ruta por operationId \"danio\" antes de persistir.",
       "method": "GET",
       "body": {},
       "parameters": [],
@@ -1208,17 +1208,102 @@
       "_type": "request"
     },
     {
+      "_id": "req_catalogo",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/catalogo",
+      "name": "Catálogo CS2 de A1",
+      "description": "Descubre modelos, equipo, precio, daño, cargador, reserva, ráfaga, alcance y blindaje antes de crear armas.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 2.1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_alias_municion",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/companeros/municion",
+      "name": "Alias A2 - operationId municion",
+      "description": "Expone en A1 el mismo operationId que A1 espera consumir de Fabricio; equivalente a validarMunicion.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"carga\": 1,\n  \"dano\": 30\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2.2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_alias_danio",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/api/companeros/danio",
+      "name": "AliasA3 - operationId danio",
+      "description": "Expone en A1 el mismo operationId que A1 espera consumir de Joaquín; comprueba que el objetivo pueda recibir daño.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"vida\": 50,\n  \"blindaje\": 20\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2.3,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
       "_id": "req_escenario_feliz",
       "parentId": "fld_poo09",
       "modified": 1794314745865,
       "created": 1794314745865,
       "url": "{{ _.a1_base_url }}/escenarios/disparo-coordinado",
       "name": "Escenario feliz (A2 y A3 aceptan)",
-      "description": "Guarda la jugada en H2 y devuelve las dos aprobaciones.",
+      "description": "A1 consulta \"municion\" en Fabricio y \"danio\" en Joaquín; guarda la jugada si ambos aprueban. Repetir con la misma idempotencyKey devuelve la jugada persistida.",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"jugadorId\": {{ _.jugador_id }},\n  \"armaId\": {{ _.arma_id }}\n}"
+        "text": "{\n  \"jugadorId\": {{ _.jugador_id }},\n  \"armaId\": {{ _.arma_id }},\n  \"equipoTirador\": \"TERRORISTAS\",\n  \"equipoObjetivo\": \"ANTITERRORISTAS\",\n  \"idempotencyKey\": \"escenario-feliz-001\"\n}"
       },
       "parameters": [],
       "headers": [
@@ -1229,6 +1314,37 @@
       ],
       "authentication": {},
       "metaSortKey": 3,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_validacion_400",
+      "parentId": "fld_poo09",
+      "modified": 1794314745865,
+      "created": 1794314745865,
+      "url": "{{ _.a1_base_url }}/escenarios/disparo-coordinado",
+      "name": "Validación 400 - falta jugadorId",
+      "description": "Muestra el error tipado con campo, errores y traceId antes de consultar a los compañeros.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"armaId\": {{ _.arma_id }}\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 3.5,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,
@@ -1268,11 +1384,11 @@
       "created": 1794314745865,
       "url": "{{ _.a1_base_url }}/escenarios/disparo-coordinado",
       "name": "Rechazo de A2 (munición)",
-      "description": "Usa el fusil con cargador vacío: A2 rechaza y A1 no escribe en H2.",
+      "description": "Usa el fusil con cargador vacío: Fabricio rechaza \"municion\" con 409 y A1 no escribe en H2.",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"jugadorId\": {{ _.jugador_id }},\n  \"armaId\": {{ _.arma_sin_municion_id }}\n}"
+        "text": "{\n  \"jugadorId\": {{ _.jugador_id }},\n  \"armaId\": {{ _.arma_sin_municion_id }},\n  \"equipoTirador\": \"TERRORISTAS\",\n  \"equipoObjetivo\": \"ANTITERRORISTAS\",\n  \"idempotencyKey\": \"rechazo-a2-001\"\n}"
       },
       "parameters": [],
       "headers": [
@@ -1299,11 +1415,11 @@
       "created": 1794314745865,
       "url": "{{ _.a1_base_url }}/escenarios/disparo-coordinado",
       "name": "Rechazo de A3 (jugador eliminado)",
-      "description": "Usa el jugador ya eliminado: A2 acepta, A3 rechaza y H2 queda igual.",
+      "description": "Usa el jugador ya eliminado: Fabricio acepta, Joaquín rechaza \"danio\" con 422 y H2 queda igual.",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"jugadorId\": {{ _.jugador_mortal_id }},\n  \"armaId\": {{ _.arma_id }}\n}"
+        "text": "{\n  \"jugadorId\": {{ _.jugador_mortal_id }},\n  \"armaId\": {{ _.arma_id }},\n  \"equipoTirador\": \"TERRORISTAS\",\n  \"equipoObjetivo\": \"ANTITERRORISTAS\",\n  \"idempotencyKey\": \"rechazo-a3-001\"\n}"
       },
       "parameters": [],
       "headers": [

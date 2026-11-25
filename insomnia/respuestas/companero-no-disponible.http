@@ -1,0 +1,15 @@
+HTTP/1.1 502 Bad Gateway
+Content-Type: application/json
+
+{
+  "timestamp": "2026-11-25T12:10:44.128",
+  "traceId": "e8d3f1d0-1234-4c9a-9a2f-0de3e7f3f5b1",
+  "status": 502,
+  "error": "Bad Gateway",
+  "excepcion": "CompaneroNoDisponibleException",
+  "mensaje": "No se pudo consultar a A2",
+  "path": "/escenarios/disparo-coordinado",
+  "rechazadoPor": "A2",
+  "statusRemoto": 503,
+  "cuerpoRemoto": "upstream unavailable"
+}

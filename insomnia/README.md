@@ -12,8 +12,8 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
 5. Revisar el environment **Base**.
 6. Arrancar la API con `cd cs2 && ./mvnw spring-boot:run` (o
    `bash ./mvnw spring-boot:run` si el wrapper no tiene permiso). Para POO-09
-   arrancar también A2 en `http://localhost:8081` y A3 en `http://localhost:8082`
-   (o cambiar `a2_base_url` y `a3_base_url`).
+   arrancar también Fabricio como A2 en `http://localhost:8081` y Joaquín como
+   A3 en `http://localhost:8082` (o cambiar `a2_base_url` y `a3_base_url`).
 7. Ejecutar las carpetas en el orden indicado más abajo. Cuando un POST devuelva
    un `id`, copiarlo en la variable de environment correspondiente. La carpeta
    `09 - Limpieza` se ejecuta recién al final, después de simular y revisar H2.
@@ -31,11 +31,31 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
 | `jugador_mortal_id` | Id del jugador que se elimina para provocar el 409 de jugador eliminado. |
 | `arma_letal_id` | Id del AWP con daño 115 usado para eliminar al jugador de prueba. |
 | `a1_base_url` | URL de A1, por defecto `http://localhost:8080`. |
-| `a2_base_url` | URL base de A2, por defecto `http://localhost:8081`. |
-| `a3_base_url` | URL base de A3, por defecto `http://localhost:8082`. |
-| `a2_openapi` | Documento OpenAPI de A2; se usa `http://localhost:8081/v3/api-docs`. |
-| `a3_openapi` | Documento OpenAPI de A3; se usa `http://localhost:8082/v3/api-docs`. |
+| `a2_base_url` | URL base de Fabricio (A2), por defecto `http://localhost:8081`. |
+| `a3_base_url` | URL base de Joaquín (A3), por defecto `http://localhost:8082`. |
+| `a2_openapi` | OpenAPI de Fabricio; se usa `http://localhost:8081/v3/api-docs`. |
+| `a3_openapi` | OpenAPI de Joaquín; se usa `http://localhost:8082/v3/api-docs`. |
 | `escenario_id` | Id devuelto por el escenario feliz, para volver a leerlo. |
+
+## Captura reproducible
+
+La colección es para ejecutar a mano; la evidencia automática está en
+`capturar-respuestas.sh`. Con los tres servicios levantados, desde la raíz:
+
+```bash
+bash insomnia/capturar-respuestas.sh
+```
+
+El script usa `urllib` de Python (no necesita `jq`) y deja en
+`insomnia/respuestas/capturas/` un JSON por pedido más `resumen.md`. Recorre:
+OpenAPI de A1/A2/A3, catálogo y aliases de A1, reglas directas de Fabricio y
+Joaquín con caso aceptado y rechazado, escenario feliz, repetición con la misma
+`idempotencyKey`, GET del escenario, rechazo de A2, rechazo de A3, validación 400
+y GET final de comparación. Si un status no es el esperado, el script se detiene.
+
+Variables opcionales: `A1_BASE_URL`, `A2_BASE_URL`, `A3_BASE_URL`,
+`A1_OPENAPI_URL`, `A2_OPENAPI_URL`, `A3_OPENAPI_URL`, `A2_COMMIT`, `A3_COMMIT` y
+`CAPTURA_DIR`.
 
 ## Orden sugerido para la defensa
 
@@ -71,11 +91,23 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
       incluir `"excepcion": "JugadorEliminadoException"`.
 11. Abrir `http://localhost:8080/h2-console` y consultar `ARMAS`, `JUGADORES`,
     `CHALECOS` y `SIMULACIONES`.
-12. `10 - POO-09 (APIs cruzadas)` → ejecutar en este orden:
-    - **OpenAPI A1 (propio)**, **OpenAPI A2** y **OpenAPI A3**. Confirmar que
-      los tres exponen `/v3/api-docs`.
-    - **Escenario feliz (A2 y A3 aceptan)**. Debe responder `201`; copiar el
-      `id` devuelto en `escenario_id`.
+ 12. `10 - POO-09 (APIs cruzadas)` → ejecutar en este orden:
+     - **Catálogo CS2 de A1**. Confirma modelos, equipo, precio, daño,
+       cargador, reserva, ráfaga, alcance y penetración de blindaje.
+     - **Alias A2 - operationId municion** y **Alias A3 - operationId danio**.
+       Muestran que A1 expone los mismos `operationId` que espera consumir.
+     - **OpenAPI A1 (propio)**, **OpenAPI A2 (Fabricio)** y
+       **OpenAPI A3 (Joaquín)**. Confirmar que los tres exponen `/v3/api-docs`.
+
+    - **Escenario feliz (A2 y A3 aceptan)**. Debe responder `201`; A1 consulta
+      `municion` en Fabricio y `danio` en Joaquín, exige `permitido:true` en
+      ambas respuestas y guarda la jugada. Copiar el `id` devuelto en
+      `escenario_id`.
+    - Repetir **Escenario feliz** con la misma `idempotencyKey`: debe devolver
+      el mismo `id` y no consultar a los compañeros. Para una jugada nueva,
+      cambiar la clave.
+    - **Validación 400 - falta jugadorId**. Debe responder `400` con `campo`,
+      `errores` y `traceId`, sin consultar a los compañeros.
     - **GET escenario persistido**. Debe devolver `200` con las aprobaciones
       `a2` y `a3`.
     - **GET escenarios (comparar tras rechazo)**. Anotar la cantidad actual.
@@ -84,10 +116,14 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
     - **GET escenarios (comparar tras rechazo)**. Debe mostrar la misma
       cantidad que antes del rechazo.
     - **Rechazo de A3 (jugador eliminado)**. Debe responder `409` con
-      `"rechazadoPor": "A3"`; el jugador eliminado se preparó en el paso 10.
+      `"rechazadoPor": "A3"` y `statusRemoto: 422`; el jugador eliminado se
+      preparó en el paso 10.
     - **GET escenarios (comparar tras rechazo)**. Debe seguir igual.
+    - Si A2 o A3 están apagados, el escenario debe responder `502`/`504` con
+      `traceId`, `statusRemoto` y `cuerpoRemoto`, sin escribir en H2; comparar
+      con `insomnia/respuestas/companero-no-disponible.http`.
      - Abrir H2 y comprobar que `ESCENARIOS` y `SIMULACIONES` no crecieron con
-       los rechazos.
+       los rechazos ni con la repetición idempotente.
      - **GET reglas propias (resumen)**. Muestra las dos reglas de A1.
      - **Regla munición - caso aceptado / rechazado (409) / dato inválido (400)**
        y **Regla jugador vivo - caso aceptado / rechazado (409) / dato inválido
@@ -126,10 +162,12 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
 - **09 - Limpieza (opcional):** DELETE de arma, fusil, granada y jugador. Se
   ejecuta después de la simulación y de consultar H2 para no borrar los ids que
   usa la defensa.
-- **10 - POO-09 (APIs cruzadas):** OpenAPI de A1, A2 y A3; reglas propias para
-  rotación; escenario feliz; GET del escenario persistido; rechazos atribuidos a
-  A2 y A3; GET de comparación. Los ejemplos de respuesta están en
-  `insomnia/respuestas/`.
+- **10 - POO-09 (APIs cruzadas):** catálogo CS2, aliases con los `operationId`
+  esperados, OpenAPI de A1, Fabricio (A2) y Joaquín (A3); reglas propias para
+  rotación; validación 400; escenario feliz idempotente; GET del escenario
+  persistido; rechazos atribuidos a A2 y A3; GET de comparación. Los ejemplos
+  de respuesta están en `insomnia/respuestas/` y las respuestas reales
+  regenerables en `insomnia/respuestas/capturas/`.
 
 ## Resultados esperados
 
@@ -144,7 +182,16 @@ Archivo: `cs2-insomnia.json` (formato de exportación de Insomnia v4).
   `granada`, etc.) para distinguir el subtipo.
 - Los DELETE de `09 - Limpieza` responden `204`; si se repite el mismo id, el
   segundo intento responde `404`.
+- `/api/catalogo` responde `200` con el catálogo CS2 de A1 y los aliases
+  `/api/companeros/municion` y `/api/companeros/danio` responden `200`.
 - `/v3/api-docs` responde `200` en A1, A2 y A3.
-- El escenario feliz responde `201` e incluye `a2.status` y `a3.status` en `200`.
+- El escenario feliz responde `201` e incluye `a2.status` y `a3.status` en `200`
+  con `permitido:true`.
+- Repetir la misma `idempotencyKey` devuelve el mismo escenario sin escribir de
+  nuevo; un cuerpo sin `jugadorId` responde `400` con `traceId`.
 - Los rechazos de compañero responden `409` con `rechazadoPor` igual a `A2` o
-  `A3`; `ESCENARIOS` y `SIMULACIONES` no crecen.
+  `A3`; si el compañero no responde, responde `502`/`504` con `traceId`. En
+  ambos casos `ESCENARIOS` y `SIMULACIONES` no crecen.
+- `insomnia/respuestas/capturas/resumen.md` refleja la corrida real: 21 pedidos
+  con sus statuses, idempotencia verificada y la lista de escenarios igual antes
+  y después de los rechazos.

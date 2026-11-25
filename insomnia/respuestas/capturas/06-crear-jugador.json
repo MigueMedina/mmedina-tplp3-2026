@@ -1,0 +1,18 @@
+{
+  "nombre": "06-crear-jugador",
+  "fecha": "2026-11-25T10:09:26-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8080/jugadores",
+  "cuerpoEnviado": {
+    "nombre": "captura-20261125T100926-0300-objetivo",
+    "blindaje": 0
+  },
+  "statusHttp": 201,
+  "respuesta": {
+    "id": 1,
+    "nombre": "captura-20261125T100926-0300-objetivo",
+    "vida": 100,
+    "blindaje": 0,
+    "vivo": true
+  }
+}

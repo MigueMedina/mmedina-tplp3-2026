@@ -1,0 +1,16 @@
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "timestamp": "2026-11-25T12:20:31.907",
+  "traceId": "7f5a2c11-9b64-4f0e-8c1d-6a2f9e0b4d77",
+  "status": 400,
+  "error": "Bad Request",
+  "excepcion": "MethodArgumentNotValidException",
+  "mensaje": "jugadorId: debe no ser nulo",
+  "path": "/escenarios/disparo-coordinado",
+  "campo": "jugadorId",
+  "errores": {
+    "jugadorId": "debe no ser nulo"
+  }
+}

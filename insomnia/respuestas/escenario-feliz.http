@@ -15,19 +15,19 @@ Content-Type: application/json
     "arma": "AK-47",
     "tipoArma": "fusil",
     "dano": 36,
-    "fecha": "2026-11-22T17:47:36.881"
+    "fecha": "2026-11-24T23:20:12.481"
   },
   "a2": {
     "companero": "A2",
     "status": 200,
-    "cuerpo": "{\"aprobado\":true}",
-    "operacion": "POST /reglas/municion/validar"
+    "cuerpo": "{\"permitido\":true,\"cargadorAntes\":30,\"balasNecesarias\":1,\"cargadorDespues\":29}",
+    "operacion": "POST /api/reglas/municion"
   },
   "a3": {
     "companero": "A3",
     "status": 200,
-    "cuerpo": "{\"aprobado\":true}",
-    "operacion": "POST /reglas/jugadores/validar-vivo"
+    "cuerpo": "{\"regla\":\"DANIO\",\"permitido\":true,\"resultado\":{\"absorbidoPorBlindaje\":0,\"danioALaVida\":36,\"vidaFinal\":64,\"blindajeFinal\":0,\"eliminado\":false}}",
+    "operacion": "POST /api/reglas/danio"
   },
-  "fecha": "2026-11-22T17:47:36.881"
+  "fecha": "2026-11-24T23:20:12.481"
 }

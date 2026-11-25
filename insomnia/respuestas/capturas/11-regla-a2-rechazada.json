@@ -1,0 +1,18 @@
+{
+  "nombre": "11-regla-a2-rechazada",
+  "fecha": "2026-11-25T10:09:26-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8081/api/reglas/municion",
+  "cuerpoEnviado": {
+    "cargador": 0,
+    "balasPorDisparo": 1,
+    "disparos": 1
+  },
+  "statusHttp": 409,
+  "respuesta": {
+    "status": 409,
+    "error": "SIN_MUNICION",
+    "excepcion": "SinMunicionException",
+    "mensaje": "La ráfaga necesita 1 balas y el cargador tiene 0: hay que recargar"
+  }
+}

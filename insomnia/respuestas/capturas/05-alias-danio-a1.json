@@ -1,0 +1,18 @@
+{
+  "nombre": "05-alias-danio-a1",
+  "fecha": "2026-11-25T10:09:26-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8080/api/companeros/danio",
+  "cuerpoEnviado": {
+    "vida": 100,
+    "blindaje": 0
+  },
+  "statusHttp": 200,
+  "respuesta": {
+    "permitido": true,
+    "regla": "Un jugador con vida mayor que 0 sigue en juego; con vida 0 no recibe más disparos.",
+    "detalle": "El jugador sigue vivo y puede recibir el disparo",
+    "vida": 100,
+    "blindaje": 0
+  }
+}

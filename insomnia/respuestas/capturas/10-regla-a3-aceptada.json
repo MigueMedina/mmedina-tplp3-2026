@@ -1,0 +1,27 @@
+{
+  "nombre": "10-regla-a3-aceptada",
+  "fecha": "2026-11-25T10:09:26-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8082/api/reglas/danio",
+  "cuerpoEnviado": {
+    "tirador": "A1-MigueMedina",
+    "equipoTirador": "TERRORISTAS",
+    "objetivo": "captura-20261125T100926-0300-objetivo",
+    "equipoObjetivo": "ANTITERRORISTAS",
+    "vidaObjetivo": 100,
+    "blindajeObjetivo": 0,
+    "danio": 36
+  },
+  "statusHttp": 200,
+  "respuesta": {
+    "regla": "DANIO",
+    "permitido": true,
+    "resultado": {
+      "absorbidoPorBlindaje": 0,
+      "danioALaVida": 36,
+      "vidaFinal": 64,
+      "blindajeFinal": 0,
+      "eliminado": false
+    }
+  }
+}

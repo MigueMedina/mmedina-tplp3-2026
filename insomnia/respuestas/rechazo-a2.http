@@ -2,7 +2,7 @@ HTTP/1.1 409 Conflict
 Content-Type: application/json
 
 {
-  "timestamp": "2026-11-22T17:47:36.882",
+  "timestamp": "2026-11-24T23:20:12.482",
   "status": 409,
   "error": "Conflict",
   "excepcion": "CompanneroRechazoException",
@@ -10,5 +10,5 @@ Content-Type: application/json
   "path": "/escenarios/disparo-coordinado",
   "rechazadoPor": "A2",
   "statusRemoto": 409,
-  "cuerpoRemoto": "{\"excepcion\":\"MunicionInsuficienteException\"}"
+  "cuerpoRemoto": "{\"status\":409,\"error\":\"SIN_MUNICION\",\"excepcion\":\"SinMunicionException\",\"mensaje\":\"La ráfaga necesita 1 balas y el cargador tiene 0: hay que recargar\"}"
 }

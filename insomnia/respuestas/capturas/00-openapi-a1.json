@@ -1,0 +1,3011 @@
+{
+  "nombre": "00-openapi-a1",
+  "fecha": "2026-11-25T10:09:26-03:00",
+  "metodo": "GET",
+  "url": "http://localhost:8080/v3/api-docs",
+  "cuerpoEnviado": null,
+  "statusHttp": 200,
+  "respuesta": {
+    "openapi": "3.0.1",
+    "info": {
+      "title": "CS2 API - POO-08/POO-09",
+      "description": "API REST de Counter-Strike 2 con CRUD persistente, simulación de disparo y escenario coordinado que consume las reglas de A2 y A3.",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:8080",
+        "description": "Generated server url"
+      }
+    ],
+    "tags": [
+      {
+        "name": "Reglas",
+        "description": "Consulta stateless de las dos reglas, sin repositorios ni escrituras en H2."
+      },
+      {
+        "name": "Escenario coordinado",
+        "description": "Escenario POO-09: exige las aprobaciones de A2 y A3 antes de persistir."
+      },
+      {
+        "name": "Interfaz",
+        "description": "Elementos polimórficos que implementan UICapable."
+      },
+      {
+        "name": "Jugadores",
+        "description": "CRUD de jugadores con vida inicial 100 y chaleco opcional."
+      },
+      {
+        "name": "Simulación",
+        "description": "Disparo persistido y reglas de munición, chaleco y jugador eliminado."
+      },
+      {
+        "name": "Salud",
+        "description": "Verificación de que el servicio está vivo."
+      },
+      {
+        "name": "POO legacy",
+        "description": "Endpoints de demostración de POO que no persisten datos."
+      },
+      {
+        "name": "Contrato para compañeros",
+        "description": "Aliases con los operationId que A1 espera consumir de A2/A3: munición y daño."
+      },
+      {
+        "name": "Catálogo",
+        "description": "Armas disponibles con stats orientativas para que A2/A3 descubran el contrato de A1."
+      },
+      {
+        "name": "Armas (CRUD)",
+        "description": "CRUD persistente de la familia Arma y de las hijas Fusil y Granada."
+      }
+    ],
+    "paths": {
+      "/jugadores/{id}": {
+        "get": {
+          "tags": [
+            "Jugadores"
+          ],
+          "summary": "Buscar un jugador por id",
+          "operationId": "buscarJugador",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "No existe un jugador con ese id.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/JugadorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Jugadores"
+          ],
+          "summary": "Actualizar nombre o blindaje",
+          "operationId": "actualizarJugador",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JugadorRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Jugador actualizado.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/JugadorResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "No existe un jugador con ese id.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/JugadorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Jugadores"
+          ],
+          "summary": "Eliminar un jugador",
+          "operationId": "eliminarJugador",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Jugador eliminado."
+            }
+          }
+        }
+      },
+      "/armas/{id}": {
+        "get": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Buscar un arma por id",
+          "operationId": "buscarArma",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "No existe un arma con ese id.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/AWP"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Escopeta"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Flash"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Fusil"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Granada"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Humo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Pistola"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Actualizar parcialmente un arma",
+          "operationId": "actualizarArma",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Arma actualizada.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/AWP"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Escopeta"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Flash"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Fusil"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Granada"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Humo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Pistola"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Datos inválidos.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/AWP"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Escopeta"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Flash"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Fusil"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Granada"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Humo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Pistola"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "No existe un arma con ese id.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/AWP"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Escopeta"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Flash"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Fusil"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Granada"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Humo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Pistola"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Eliminar un arma",
+          "operationId": "eliminarArma",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Arma eliminada."
+            },
+            "404": {
+              "description": "No existe un arma con ese id."
+            }
+          }
+        }
+      },
+      "/armas/granadas/{id}": {
+        "get": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Buscar una granada por id",
+          "operationId": "buscarGranada",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "No existe una granada con ese id.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Granada"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Actualizar una granada",
+          "operationId": "actualizarGranada",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "404": {
+              "description": "No existe una granada con ese id.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Granada"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Eliminar una granada",
+          "operationId": "eliminarGranada",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Granada eliminada."
+            }
+          }
+        }
+      },
+      "/armas/fusiles/{id}": {
+        "get": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Buscar un fusil por id",
+          "operationId": "buscarFusil",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "No existe un fusil con ese id.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Fusil"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Actualizar un fusil",
+          "operationId": "actualizarFusil",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "404": {
+              "description": "No existe un fusil con ese id.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Fusil"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Eliminar un fusil",
+          "operationId": "eliminarFusil",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Fusil eliminado."
+            }
+          }
+        }
+      },
+      "/simulacion/disparar": {
+        "post": {
+          "tags": [
+            "Simulación"
+          ],
+          "summary": "Disparar un arma contra un jugador",
+          "description": "Descuenta una bala, aplica el chaleco que absorbe hasta el 50% del daño y persiste la fila en `simulaciones`. Devuelve 409 cuando el cargador está vacío o el jugador ya está muerto.",
+          "operationId": "simularDisparo",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisparoRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "description": "Disparo aplicado e historial persistido.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SimulacionResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Faltan ids o el arma no es ofensiva.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SimulacionResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "No existe el jugador o el arma indicada.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SimulacionResponse"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Regla de negocio incumplida: munición insuficiente o jugador eliminado.",
+              "content": {
+                "application/json": {
+                  "examples": {
+                    "MunicionInsuficienteException": {
+                      "description": "MunicionInsuficienteException",
+                      "value": {
+                        "timestamp": "2026-11-22T12:00:00",
+                        "status": 409,
+                        "error": "Conflict",
+                        "excepcion": "MunicionInsuficienteException",
+                        "mensaje": "AK-47 no puede disparar: cargador insuficiente (0 balas, necesita 1)",
+                        "path": "/simulacion/disparar"
+                      }
+                    },
+                    "JugadorEliminadoException": {
+                      "description": "JugadorEliminadoException",
+                      "value": {
+                        "timestamp": "2026-11-22T12:00:00",
+                        "status": 409,
+                        "error": "Conflict",
+                        "excepcion": "JugadorEliminadoException",
+                        "mensaje": "El jugador Neo ya está muerto y no puede recibir más disparos",
+                        "path": "/simulacion/disparar"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/jugadores": {
+        "get": {
+          "tags": [
+            "Jugadores"
+          ],
+          "summary": "Listar jugadores persistidos",
+          "operationId": "listarJugadores",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/JugadorResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Jugadores"
+          ],
+          "summary": "Crear un jugador con vida 100",
+          "description": "Si se indica `blindaje`, se persiste un Chaleco con esa durabilidad inicial.",
+          "operationId": "crearJugador",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JugadorRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "description": "Jugador creado.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/JugadorResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/escenarios/disparo-coordinado": {
+        "post": {
+          "tags": [
+            "Escenario coordinado"
+          ],
+          "summary": "Ejecutar el escenario con doble aprobación",
+          "description": "A1 consulta primero a A2 y después a A3 usando sus OpenAPI. Sólo si ambos aceptan se guarda la jugada en el H2 local; si uno rechaza, la base queda igual y el cuerpo indica `rechazadoPor`.",
+          "operationId": "ejecutarDisparoCoordinado",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EscenarioRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "description": "Ambas aprobaciones: jugada y escenario persistidos.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/EscenarioResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Faltan ids, clave de idempotencia o el arma no es ofensiva.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorValidacionResponse"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Rechazo atribuido a A2 o A3; H2 sin cambios.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorCompaneroResponse"
+                  },
+                  "example": {
+                    "timestamp": "2026-11-22T12:00:00",
+                    "traceId": "e8d3f1d0-1234-4c9a-9a2f-0de3e7f3f5b1",
+                    "status": 409,
+                    "error": "Conflict",
+                    "excepcion": "CompanneroRechazoException",
+                    "mensaje": "Rechazo de A3 (HTTP 409)",
+                    "path": "/escenarios/disparo-coordinado",
+                    "rechazadoPor": "A3",
+                    "statusRemoto": 409,
+                    "statusHttp": 409,
+                    "cuerpoRemoto": "{\"excepcion\":\"JugadorEliminadoException\"}"
+                  }
+                }
+              }
+            },
+            "502": {
+              "description": "A2 o A3 no está disponible; H2 sin cambios.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorCompaneroResponse"
+                  }
+                }
+              }
+            },
+            "504": {
+              "description": "Timeout consultando a un compañero; H2 sin cambios.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorCompaneroResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/armas": {
+        "get": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Listar armas persistidas",
+          "description": "Filtra opcionalmente por nombre, sin distinción de mayúsculas.",
+          "operationId": "listarArmas",
+          "parameters": [
+            {
+              "name": "nombre",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/AWP"
+                        },
+                        {
+                          "$ref": "#/components/schemas/Escopeta"
+                        },
+                        {
+                          "$ref": "#/components/schemas/Flash"
+                        },
+                        {
+                          "$ref": "#/components/schemas/Fusil"
+                        },
+                        {
+                          "$ref": "#/components/schemas/Granada"
+                        },
+                        {
+                          "$ref": "#/components/schemas/Humo"
+                        },
+                        {
+                          "$ref": "#/components/schemas/Pistola"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Crear un arma",
+          "description": "El id lo asigna H2. Un precio negativo responde 400.",
+          "operationId": "crearArma",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "description": "Arma creada con `tipoArma`.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/AWP"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Escopeta"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Flash"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Fusil"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Granada"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Humo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Pistola"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Datos inválidos, por ejemplo precio negativo.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/AWP"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Escopeta"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Flash"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Fusil"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Granada"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Humo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Pistola"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/armas/granadas": {
+        "get": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Listar granadas persistidas",
+          "operationId": "listarGranadas",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Granada"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Crear una granada persistente",
+          "operationId": "crearGranada",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "description": "Granada creada.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Granada"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/armas/fusiles": {
+        "get": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Listar fusiles persistidos",
+          "operationId": "listarFusiles",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Fusil"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Armas (CRUD)"
+          ],
+          "summary": "Crear un fusil persistente",
+          "operationId": "crearFusil",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArmaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "description": "Fusil creado.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Fusil"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/reglas/municion": {
+        "post": {
+          "tags": [
+            "Reglas"
+          ],
+          "summary": "Validar munición suficiente para un disparo",
+          "description": "Recibe el estado en el JSON. No lee ni cambia la base: 200 si hay al menos una bala, 409 si el cargador está vacío.",
+          "operationId": "validarMunicion",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReglaConsultaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Munición suficiente.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReglaMunicionResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Faltan campos o son imposibles.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  },
+                  "examples": {
+                    "DatosInvalidosException": {
+                      "description": "DatosInvalidosException",
+                      "value": {
+                        "excepcion": "DatosInvalidosException",
+                        "mensaje": "La carga del cargador no puede ser negativa"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "El cargador está vacío.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  },
+                  "examples": {
+                    "MunicionInsuficienteException": {
+                      "description": "MunicionInsuficienteException",
+                      "value": {
+                        "excepcion": "MunicionInsuficienteException",
+                        "mensaje": "No hay munición suficiente: cargador en 0 y se necesita 1 bala"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/reglas/jugador-vivo": {
+        "post": {
+          "tags": [
+            "Reglas"
+          ],
+          "summary": "Validar que el jugador siga vivo",
+          "description": "Recibe el estado en el JSON. No lee ni cambia la base: 200 con vida mayor que 0, 409 si el jugador ya tiene vida 0.",
+          "operationId": "validarJugadorVivo",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReglaConsultaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "El jugador sigue vivo.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReglaJugadorVivoResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Vida o blindaje fuera de rango.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  },
+                  "examples": {
+                    "DatosInvalidosException": {
+                      "description": "DatosInvalidosException",
+                      "value": {
+                        "excepcion": "DatosInvalidosException",
+                        "mensaje": "La vida del jugador debe estar entre 0 y 100"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "El jugador ya fue eliminado.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  },
+                  "examples": {
+                    "JugadorEliminadoException": {
+                      "description": "JugadorEliminadoException",
+                      "value": {
+                        "excepcion": "JugadorEliminadoException",
+                        "mensaje": "El jugador ya fue eliminado: vida 0"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/companeros/municion": {
+        "post": {
+          "tags": [
+            "Contrato para compañeros"
+          ],
+          "summary": "Alias de munición con el operationId que A1 espera en A2",
+          "description": "Equivale a validarMunicion. Recibe carga y dano; no lee ni cambia la base.",
+          "operationId": "municion",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReglaConsultaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Hay munición suficiente.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReglaMunicionResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Datos inválidos.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Cargador vacío.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/companeros/danio": {
+        "post": {
+          "tags": [
+            "Contrato para compañeros"
+          ],
+          "summary": "Alias de daño con el operationId que A1 espera en A3",
+          "description": "Equivale a validarJugadorVivo: comprueba que el objetivo pueda recibir daño. No calcula daño ni modifica la base.",
+          "operationId": "danio",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReglaConsultaRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "El objetivo puede recibir daño.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReglaJugadorVivoResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Datos inválidos.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "El objetivo ya fue eliminado.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/ui-capables": {
+        "get": {
+          "tags": [
+            "Interfaz"
+          ],
+          "summary": "Listar armas y jugadores con interfaz",
+          "description": "Lee de H2 y devuelve los elementos que implementan `UICapable`.",
+          "operationId": "listarUICapables",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/UICapable"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/simulacion/historial": {
+        "get": {
+          "tags": [
+            "Simulación"
+          ],
+          "summary": "Listar todo el historial de disparos",
+          "operationId": "listarHistorial",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/SimulacionResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/simulacion/historial/jugador/{jugadorId}": {
+        "get": {
+          "tags": [
+            "Simulación"
+          ],
+          "summary": "Listar el historial de un jugador",
+          "operationId": "listarHistorialPorJugador",
+          "parameters": [
+            {
+              "name": "jugadorId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "No existe el jugador indicado.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/SimulacionResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/escenarios": {
+        "get": {
+          "tags": [
+            "Escenario coordinado"
+          ],
+          "summary": "Listar escenarios aprobados y persistidos",
+          "operationId": "listarEscenarios",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EscenarioResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/escenarios/{id}": {
+        "get": {
+          "tags": [
+            "Escenario coordinado"
+          ],
+          "summary": "Buscar un escenario por id",
+          "operationId": "buscarEscenario",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "No existe el escenario indicado.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/EscenarioResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/arma": {
+        "get": {
+          "tags": [
+            "POO legacy"
+          ],
+          "summary": "Construir un arma en memoria (demo POO)",
+          "operationId": "demoCrearArma",
+          "parameters": [
+            {
+              "name": "tipo",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "default": "pistola"
+              }
+            },
+            {
+              "name": "nombre",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "default": "Arma"
+              }
+            },
+            {
+              "name": "id",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 1
+              }
+            },
+            {
+              "name": "precio",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 100.0
+              }
+            },
+            {
+              "name": "dano",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 10
+              }
+            },
+            {
+              "name": "precision",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 50
+              }
+            },
+            {
+              "name": "recarga",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 2.0
+              }
+            },
+            {
+              "name": "velocidad",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 5.0
+              }
+            },
+            {
+              "name": "capacidadCargador",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 30
+              }
+            },
+            {
+              "name": "automatica",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "silenciador",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "mira",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 1
+              }
+            },
+            {
+              "name": "retroceso",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 10
+              }
+            },
+            {
+              "name": "radio",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 1.0
+              }
+            },
+            {
+              "name": "duracionCeguera",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 1.0
+              }
+            },
+            {
+              "name": "intensidad",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 50
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/AWP"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Escopeta"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Flash"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Fusil"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Granada"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Humo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Pistola"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/arma/accion": {
+        "get": {
+          "tags": [
+            "POO legacy"
+          ],
+          "summary": "Construir un arma y mostrar recarga y tienda (demo POO)",
+          "operationId": "demoAccionArma",
+          "parameters": [
+            {
+              "name": "tipo",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "default": "pistola"
+              }
+            },
+            {
+              "name": "nombre",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "default": "Arma"
+              }
+            },
+            {
+              "name": "id",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 1
+              }
+            },
+            {
+              "name": "precio",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 100.0
+              }
+            },
+            {
+              "name": "dano",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 10
+              }
+            },
+            {
+              "name": "precision",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 50
+              }
+            },
+            {
+              "name": "recarga",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 2.0
+              }
+            },
+            {
+              "name": "velocidad",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 5.0
+              }
+            },
+            {
+              "name": "capacidadCargador",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 30
+              }
+            },
+            {
+              "name": "automatica",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "silenciador",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "mira",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 1
+              }
+            },
+            {
+              "name": "retroceso",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 10
+              }
+            },
+            {
+              "name": "radio",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 1.0
+              }
+            },
+            {
+              "name": "duracionCeguera",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "format": "double",
+                "default": 1.0
+              }
+            },
+            {
+              "name": "intensidad",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 50
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/reglas": {
+        "get": {
+          "tags": [
+            "Reglas"
+          ],
+          "summary": "Las dos reglas en una frase cada una",
+          "operationId": "listarReglas",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/catalogo": {
+        "get": {
+          "tags": [
+            "Catálogo"
+          ],
+          "summary": "Listar el catálogo CS2 de A1",
+          "description": "Devuelve modelos, equipo comprador, precio, daño, cargador, reserva, ráfaga, alcance y penetración de blindaje. Los valores son propios de A1 y sirven como referencia documental; no sustituyen al arma que el cliente elija al crearla.",
+          "operationId": "listarCatalogo",
+          "responses": {
+            "200": {
+              "description": "Catálogo completo.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CatalogoArmaResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/": {
+        "get": {
+          "tags": [
+            "Salud"
+          ],
+          "summary": "Comprobar que el servicio responde",
+          "operationId": "verificarServicio",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "JugadorRequest": {
+          "required": [
+            "nombre"
+          ],
+          "type": "object",
+          "properties": {
+            "nombre": {
+              "maxLength": 120,
+              "minLength": 0,
+              "type": "string",
+              "description": "Nombre del jugador.",
+              "example": "Neo"
+            },
+            "blindaje": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer",
+              "description": "Durabilidad inicial del chaleco; nulo o 0 significa sin chaleco.",
+              "format": "int32",
+              "example": 100
+            }
+          },
+          "description": "Datos para crear o actualizar un jugador. La vida inicial siempre es 100."
+        },
+        "JugadorResponse": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Identificador asignado por H2.",
+              "format": "int64",
+              "example": 1
+            },
+            "nombre": {
+              "type": "string",
+              "description": "Nombre del jugador.",
+              "example": "Neo"
+            },
+            "vida": {
+              "type": "integer",
+              "description": "Vida actual, entre 0 y 100.",
+              "format": "int32",
+              "example": 82
+            },
+            "blindaje": {
+              "type": "integer",
+              "description": "Durabilidad restante del chaleco.",
+              "format": "int32",
+              "example": 82
+            },
+            "vivo": {
+              "type": "boolean",
+              "description": "false cuando la vida llegó a 0."
+            }
+          },
+          "description": "Estado persistido de un jugador."
+        },
+        "ArmaRequest": {
+          "type": "object",
+          "properties": {
+            "tipo": {
+              "pattern": "(?i)fusil|pistola|escopeta|awp|flash|humo|granada",
+              "type": "string",
+              "description": "Subtipo de arma: fusil, pistola, escopeta, awp, flash, humo o granada.",
+              "example": "fusil"
+            },
+            "nombre": {
+              "type": "string",
+              "description": "Nombre comercial del arma.",
+              "example": "AK-47"
+            },
+            "precio": {
+              "type": "number",
+              "description": "Precio en dinero del juego.",
+              "format": "double",
+              "example": 2700
+            },
+            "dano": {
+              "type": "integer",
+              "description": "Daño base del arma.",
+              "format": "int32",
+              "example": 36
+            },
+            "precision": {
+              "type": "integer",
+              "description": "Precisión del arma.",
+              "format": "int32",
+              "example": 75
+            },
+            "recarga": {
+              "type": "number",
+              "description": "Tiempo de recarga en segundos.",
+              "format": "double",
+              "example": 2.5
+            },
+            "velocidad": {
+              "type": "number",
+              "description": "Velocidad de disparo.",
+              "format": "double",
+              "example": 10
+            },
+            "capacidadCargador": {
+              "type": "integer",
+              "description": "Capacidad del cargador.",
+              "format": "int32",
+              "example": 30
+            },
+            "automatica": {
+              "type": "boolean",
+              "description": "Indica si el arma es automática.",
+              "example": true
+            },
+            "silenciador": {
+              "type": "boolean",
+              "description": "Indica si el arma tiene silenciador.",
+              "example": false
+            },
+            "mira": {
+              "type": "integer",
+              "description": "Nivel de mira.",
+              "format": "int32",
+              "example": 2
+            },
+            "retroceso": {
+              "type": "integer",
+              "description": "Retroceso del arma.",
+              "format": "int32",
+              "example": 20
+            },
+            "radio": {
+              "type": "number",
+              "description": "Radio de efecto para arrojadizas.",
+              "format": "double",
+              "example": 5
+            },
+            "distancia": {
+              "type": "number",
+              "description": "Distancia de efecto para arrojadizas.",
+              "format": "double",
+              "example": 20
+            },
+            "duracion": {
+              "type": "number",
+              "description": "Duración del efecto.",
+              "format": "double",
+              "example": 15
+            },
+            "cooldown": {
+              "type": "number",
+              "description": "Tiempo de enfriamiento.",
+              "format": "double",
+              "example": 0
+            },
+            "intensidad": {
+              "type": "integer",
+              "description": "Intensidad del efecto para flash.",
+              "format": "int32",
+              "example": 50
+            },
+            "duracionCeguera": {
+              "type": "number",
+              "description": "Duración de la ceguera.",
+              "format": "double",
+              "example": 1.5
+            },
+            "aturdimiento": {
+              "type": "boolean",
+              "description": "Indica si la granada aturde.",
+              "example": false
+            },
+            "perdigon": {
+              "type": "integer",
+              "description": "Cantidad de perdigones.",
+              "format": "int32",
+              "example": 8
+            },
+            "dispersion": {
+              "type": "number",
+              "description": "Dispersión de los perdigones.",
+              "format": "double",
+              "example": 2.5
+            }
+          },
+          "description": "Datos para crear o actualizar un arma de la jerarquía CS2."
+        },
+        "AWP": {
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/Arma"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "dano": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "precision": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "recarga": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "velocidad": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "municionActual": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "capacidadCargador": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "cargadoresRestantes": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "mira": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "retroceso": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "silenciador": {
+                  "type": "boolean"
+                },
+                "imagen": {
+                  "type": "string"
+                },
+                "sonido": {
+                  "type": "string"
+                },
+                "rango": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "velocidadDisparo": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          ]
+        },
+        "Arma": {
+          "required": [
+            "tipoArma"
+          ],
+          "type": "object",
+          "properties": {
+            "nombre": {
+              "type": "string"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "precio": {
+              "type": "number",
+              "format": "double"
+            },
+            "tipoArma": {
+              "type": "string"
+            }
+          },
+          "discriminator": {
+            "propertyName": "tipoArma"
+          }
+        },
+        "Escopeta": {
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/Arma"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "dano": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "precision": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "recarga": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "velocidad": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "municionActual": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "capacidadCargador": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "cargadoresRestantes": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "perdigon": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "dispersion": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "velocidadDisparo": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          ]
+        },
+        "Flash": {
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/Arma"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tipo": {
+                  "type": "string"
+                },
+                "radio": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "distancia": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "duracion": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "cooldown": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "intensidad": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "duracionCeguera": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "imagen": {
+                  "type": "string"
+                },
+                "sonido": {
+                  "type": "string"
+                },
+                "velocidadDisparo": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "rango": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          ]
+        },
+        "Fusil": {
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/Arma"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "dano": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "precision": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "recarga": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "velocidad": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "municionActual": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "capacidadCargador": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "cargadoresRestantes": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "automatica": {
+                  "type": "boolean"
+                },
+                "mira": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "retroceso": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "silenciador": {
+                  "type": "boolean"
+                },
+                "imagen": {
+                  "type": "string"
+                },
+                "sonido": {
+                  "type": "string"
+                },
+                "rango": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "velocidadDisparo": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          ]
+        },
+        "Granada": {
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/Arma"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tipo": {
+                  "type": "string"
+                },
+                "radio": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "distancia": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "duracion": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "cooldown": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "dano": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "aturdimiento": {
+                  "type": "boolean"
+                },
+                "imagen": {
+                  "type": "string"
+                },
+                "sonido": {
+                  "type": "string"
+                },
+                "velocidadDisparo": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "rango": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          ]
+        },
+        "Humo": {
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/Arma"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tipo": {
+                  "type": "string"
+                },
+                "radio": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "distancia": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "duracion": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "cooldown": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "rango": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          ]
+        },
+        "Pistola": {
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/Arma"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "dano": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "precision": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "recarga": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "velocidad": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "municionActual": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "capacidadCargador": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "cargadoresRestantes": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "automatica": {
+                  "type": "boolean"
+                },
+                "silenciador": {
+                  "type": "boolean"
+                },
+                "velocidadDisparo": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          ]
+        },
+        "DisparoRequest": {
+          "required": [
+            "armaId",
+            "jugadorId"
+          ],
+          "type": "object",
+          "properties": {
+            "jugadorId": {
+              "type": "integer",
+              "description": "Id del jugador objetivo.",
+              "format": "int64",
+              "example": 1
+            },
+            "armaId": {
+              "type": "integer",
+              "description": "Id del arma que dispara.",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          "description": "Identificadores necesarios para simular un disparo."
+        },
+        "SimulacionResponse": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Id del historial.",
+              "format": "int64",
+              "example": 1
+            },
+            "jugadorId": {
+              "type": "integer",
+              "description": "Id del jugador objetivo.",
+              "format": "int64",
+              "example": 1
+            },
+            "jugador": {
+              "type": "string",
+              "description": "Nombre del jugador.",
+              "example": "Neo"
+            },
+            "vidaAntes": {
+              "type": "integer",
+              "description": "Vida antes del disparo.",
+              "format": "int32",
+              "example": 100
+            },
+            "vidaDespues": {
+              "type": "integer",
+              "description": "Vida después del disparo.",
+              "format": "int32",
+              "example": 82
+            },
+            "danoAplicado": {
+              "type": "integer",
+              "description": "Daño efectivo descontado de la vida.",
+              "format": "int32",
+              "example": 18
+            },
+            "vivo": {
+              "type": "boolean",
+              "description": "false si el jugador quedó eliminado."
+            },
+            "armaId": {
+              "type": "integer",
+              "description": "Id del arma usada.",
+              "format": "int32",
+              "example": 1
+            },
+            "arma": {
+              "type": "string",
+              "description": "Nombre del arma.",
+              "example": "AK-47"
+            },
+            "tipoArma": {
+              "type": "string",
+              "description": "Subtipo del arma en minúsculas.",
+              "example": "fusil"
+            },
+            "dano": {
+              "type": "integer",
+              "description": "Daño base del arma.",
+              "format": "int32",
+              "example": 36
+            },
+            "fecha": {
+              "type": "string",
+              "description": "Fecha y hora del disparo.",
+              "format": "date-time"
+            }
+          },
+          "description": "Resultado persistido de una simulación de disparo."
+        },
+        "EscenarioRequest": {
+          "required": [
+            "armaId",
+            "jugadorId"
+          ],
+          "type": "object",
+          "properties": {
+            "jugadorId": {
+              "type": "integer",
+              "description": "Id local del jugador objetivo.",
+              "format": "int64",
+              "example": 1
+            },
+            "armaId": {
+              "type": "integer",
+              "description": "Id local del arma que dispara.",
+              "format": "int32",
+              "example": 1
+            },
+            "equipoTirador": {
+              "maxLength": 40,
+              "minLength": 0,
+              "pattern": "[A-Za-z ]*",
+              "type": "string",
+              "description": "Equipo del tirador; si se omite se usa TERRORISTAS.",
+              "example": "TERRORISTAS"
+            },
+            "equipoObjetivo": {
+              "maxLength": 40,
+              "minLength": 0,
+              "pattern": "[A-Za-z ]*",
+              "type": "string",
+              "description": "Equipo del objetivo; si se omite se usa ANTITERRORISTAS.",
+              "example": "ANTITERRORISTAS"
+            },
+            "idempotencyKey": {
+              "maxLength": 100,
+              "minLength": 0,
+              "pattern": "[A-Za-z0-9._:-]*",
+              "type": "string",
+              "description": "Clave opcional para repetir la misma petición sin duplicar la jugada.",
+              "example": "escenario-1"
+            }
+          },
+          "description": "Datos del escenario coordinado de CS2."
+        },
+        "ErrorValidacionResponse": {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "type": "string",
+              "description": "Momento del error.",
+              "format": "date-time"
+            },
+            "traceId": {
+              "type": "string",
+              "description": "Identificador de traza."
+            },
+            "status": {
+              "type": "integer",
+              "description": "Código HTTP.",
+              "format": "int32",
+              "example": 400
+            },
+            "error": {
+              "type": "string",
+              "description": "Razón del código HTTP.",
+              "example": "Bad Request"
+            },
+            "excepcion": {
+              "type": "string",
+              "description": "Nombre simple de la excepción.",
+              "example": "MethodArgumentNotValidException"
+            },
+            "mensaje": {
+              "type": "string",
+              "description": "Mensaje con todos los campos inválidos."
+            },
+            "path": {
+              "type": "string",
+              "description": "Ruta solicitada."
+            },
+            "campo": {
+              "type": "string",
+              "description": "Primer campo inválido.",
+              "example": "jugadorId"
+            },
+            "errores": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "description": "Mapa campo -> mensaje de validación.",
+                "example": "{\"jugadorId\":\"debe no ser nulo\"}"
+              },
+              "description": "Mapa campo -> mensaje de validación.",
+              "example": {
+                "jugadorId": "debe no ser nulo"
+              }
+            }
+          },
+          "description": "Cuerpo tipado de errores 400 por validación de entrada."
+        },
+        "ErrorCompaneroResponse": {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "type": "string",
+              "description": "Momento del error.",
+              "format": "date-time"
+            },
+            "traceId": {
+              "type": "string",
+              "description": "Identificador de traza."
+            },
+            "status": {
+              "type": "integer",
+              "description": "Código HTTP devuelto por A1.",
+              "format": "int32",
+              "example": 502
+            },
+            "error": {
+              "type": "string",
+              "description": "Razón del código HTTP.",
+              "example": "Bad Gateway"
+            },
+            "excepcion": {
+              "type": "string",
+              "description": "Nombre simple de la excepción.",
+              "example": "CompaneroNoDisponibleException"
+            },
+            "mensaje": {
+              "type": "string",
+              "description": "Mensaje legible del error."
+            },
+            "path": {
+              "type": "string",
+              "description": "Ruta solicitada."
+            },
+            "rechazadoPor": {
+              "type": "string",
+              "description": "Compañero que rechazó o no respondió.",
+              "example": "A2",
+              "enum": [
+                "A2",
+                "A3"
+              ]
+            },
+            "statusRemoto": {
+              "type": "integer",
+              "description": "Código HTTP devuelto por el compañero.",
+              "format": "int32",
+              "example": 503
+            },
+            "cuerpoRemoto": {
+              "type": "string",
+              "description": "Cuerpo recibido del compañero, recortado.",
+              "example": "upstream unavailable"
+            },
+            "statusHttp": {
+              "type": "integer",
+              "description": "Código HTTP expuesto por A1.",
+              "format": "int32",
+              "example": 502
+            }
+          },
+          "description": "Cuerpo tipado de rechazos 409 y fallos 502/504 de A2/A3."
+        },
+        "Aprobacion": {
+          "type": "object",
+          "properties": {
+            "companero": {
+              "type": "string"
+            },
+            "status": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "cuerpo": {
+              "type": "string"
+            },
+            "operacion": {
+              "type": "string"
+            }
+          }
+        },
+        "EscenarioResponse": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "simulacion": {
+              "$ref": "#/components/schemas/SimulacionResponse"
+            },
+            "a2": {
+              "$ref": "#/components/schemas/Aprobacion"
+            },
+            "a3": {
+              "$ref": "#/components/schemas/Aprobacion"
+            },
+            "fecha": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "description": "Escenario persistido tras recibir la aprobación de A2 y A3."
+        },
+        "ReglaConsultaRequest": {
+          "type": "object",
+          "properties": {
+            "carga": {
+              "minimum": 0,
+              "type": "integer",
+              "description": "Balas disponibles en el cargador.",
+              "format": "int32",
+              "example": 1
+            },
+            "dano": {
+              "minimum": 1,
+              "type": "integer",
+              "description": "Daño del disparo; debe ser mayor que cero.",
+              "format": "int32",
+              "example": 30
+            },
+            "vida": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer",
+              "description": "Vida actual del jugador, entre 0 y 100.",
+              "format": "int32",
+              "example": 100
+            },
+            "blindaje": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer",
+              "description": "Blindaje disponible, entre 0 y 100; omitido equivale a 0.",
+              "format": "int32",
+              "example": 0
+            }
+          },
+          "description": "Estado explícito que se consulta, sin ids ni escrituras en la base."
+        },
+        "ErrorResponse": {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "type": "string",
+              "description": "Momento del error.",
+              "format": "date-time"
+            },
+            "traceId": {
+              "type": "string",
+              "description": "Identificador de traza para correlations.",
+              "example": "e8d3f1d0-1234-4c9a-9a2f-0de3e7f3f5b1"
+            },
+            "status": {
+              "type": "integer",
+              "description": "Código HTTP.",
+              "format": "int32",
+              "example": 409
+            },
+            "error": {
+              "type": "string",
+              "description": "Razón del código HTTP.",
+              "example": "Conflict"
+            },
+            "excepcion": {
+              "type": "string",
+              "description": "Nombre simple de la excepción.",
+              "example": "MunicionInsuficienteException"
+            },
+            "mensaje": {
+              "type": "string",
+              "description": "Mensaje legible del error.",
+              "example": "No hay munición suficiente"
+            },
+            "path": {
+              "type": "string",
+              "description": "Ruta solicitada.",
+              "example": "/escenarios/disparo-coordinado"
+            }
+          },
+          "description": "Cuerpo tipado de errores 400, 404, 409 y 500."
+        },
+        "ReglaMunicionResponse": {
+          "type": "object",
+          "properties": {
+            "permitido": {
+              "type": "boolean",
+              "description": "Si el arma tiene munición para disparar.",
+              "example": true
+            },
+            "regla": {
+              "type": "string",
+              "description": "Regla aplicada."
+            },
+            "detalle": {
+              "type": "string",
+              "description": "Detalle de la decisión."
+            },
+            "carga": {
+              "type": "integer",
+              "description": "Carga recibida.",
+              "format": "int32",
+              "example": 1
+            },
+            "dano": {
+              "type": "integer",
+              "description": "Daño recibido.",
+              "format": "int32",
+              "example": 30
+            }
+          },
+          "description": "Resultado de consultar la regla de munición sin modificar la base."
+        },
+        "ReglaJugadorVivoResponse": {
+          "type": "object",
+          "properties": {
+            "permitido": {
+              "type": "boolean",
+              "description": "Si el jugador puede recibir el disparo.",
+              "example": true
+            },
+            "regla": {
+              "type": "string",
+              "description": "Regla aplicada."
+            },
+            "detalle": {
+              "type": "string",
+              "description": "Detalle de la decisión."
+            },
+            "vida": {
+              "type": "integer",
+              "description": "Vida recibida.",
+              "format": "int32",
+              "example": 100
+            },
+            "blindaje": {
+              "type": "integer",
+              "description": "Blindaje recibido.",
+              "format": "int32",
+              "example": 0
+            }
+          },
+          "description": "Resultado de consultar la regla de jugador vivo sin modificar la base."
+        },
+        "UICapable": {
+          "type": "object",
+          "properties": {
+            "imagen": {
+              "type": "string"
+            },
+            "sonido": {
+              "type": "string"
+            },
+            "velocidadDisparo": {
+              "type": "number",
+              "format": "double"
+            },
+            "rango": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        },
+        "CatalogoArmaResponse": {
+          "type": "object",
+          "properties": {
+            "modelo": {
+              "type": "string",
+              "description": "Identificador estable del modelo.",
+              "example": "AK47"
+            },
+            "nombre": {
+              "type": "string",
+              "description": "Nombre comercial.",
+              "example": "AK-47"
+            },
+            "familia": {
+              "type": "string",
+              "description": "Familia del arma.",
+              "example": "fusil"
+            },
+            "equipo": {
+              "type": "string",
+              "description": "Equipo que puede comprarla.",
+              "example": "TT",
+              "enum": [
+                "CT",
+                "TT",
+                "AMBOS"
+              ]
+            },
+            "precio": {
+              "type": "integer",
+              "description": "Precio en dólares del juego.",
+              "format": "int32",
+              "example": 2700
+            },
+            "dano": {
+              "type": "integer",
+              "description": "Daño base por bala.",
+              "format": "int32",
+              "example": 38
+            },
+            "precision": {
+              "type": "integer",
+              "description": "Precisión base.",
+              "format": "int32",
+              "example": 74
+            },
+            "capacidadCargador": {
+              "type": "integer",
+              "description": "Balas en el cargador.",
+              "format": "int32",
+              "example": 30
+            },
+            "reservaBalas": {
+              "type": "integer",
+              "description": "Balas de reserva.",
+              "format": "int32",
+              "example": 90
+            },
+            "rafagaBalas": {
+              "type": "integer",
+              "description": "Balas consumidas por ráfaga.",
+              "format": "int32",
+              "example": 3
+            },
+            "alcanceMetros": {
+              "type": "integer",
+              "description": "Alcance útil en metros.",
+              "format": "int32",
+              "example": 130
+            },
+            "relacionBlindaje": {
+              "type": "number",
+              "description": "Relación de penetración de blindaje.",
+              "format": "double",
+              "example": 0.78
+            },
+            "descripcion": {
+              "type": "string",
+              "description": "Uso recomendado.",
+              "example": "Fusil automático potente."
+            }
+          },
+          "description": "Datos orientativos de un arma del catálogo CS2 de A1."
+        }
+      }
+    }
+  }
+}

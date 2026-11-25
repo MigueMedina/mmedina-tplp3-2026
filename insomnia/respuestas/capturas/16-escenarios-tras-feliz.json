@@ -1,0 +1,40 @@
+{
+  "nombre": "16-escenarios-tras-feliz",
+  "fecha": "2026-11-25T10:09:27-03:00",
+  "metodo": "GET",
+  "url": "http://localhost:8080/escenarios",
+  "cuerpoEnviado": null,
+  "statusHttp": 200,
+  "respuesta": [
+    {
+      "id": 1,
+      "simulacion": {
+        "id": 1,
+        "jugadorId": 1,
+        "jugador": "captura-20261125T100926-0300-objetivo",
+        "vidaAntes": 100,
+        "vidaDespues": 64,
+        "danoAplicado": 36,
+        "vivo": true,
+        "armaId": 1,
+        "arma": "captura-20261125T100926-0300-AK47",
+        "tipoArma": "fusil",
+        "dano": 36,
+        "fecha": "2026-11-25T10:09:27.38407"
+      },
+      "a2": {
+        "companero": "A2",
+        "status": 200,
+        "cuerpo": "{\"permitido\":true,\"cargadorAntes\":30,\"balasNecesarias\":1,\"cargadorDespues\":29}",
+        "operacion": "POST /api/reglas/municion"
+      },
+      "a3": {
+        "companero": "A3",
+        "status": 200,
+        "cuerpo": "{\"regla\":\"DANIO\",\"permitido\":true,\"resultado\":{\"absorbidoPorBlindaje\":0,\"danioALaVida\":36,\"vidaFinal\":64,\"blindajeFinal\":0,\"eliminado\":false}}",
+        "operacion": "POST /api/reglas/danio"
+      },
+      "fecha": "2026-11-25T10:09:27.387115"
+    }
+  ]
+}

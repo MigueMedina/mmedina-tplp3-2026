@@ -1,0 +1,27 @@
+{
+  "nombre": "17-rechazo-a2",
+  "fecha": "2026-11-25T10:09:27-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8080/escenarios/disparo-coordinado",
+  "cuerpoEnviado": {
+    "jugadorId": 1,
+    "armaId": 2,
+    "equipoTirador": "TERRORISTAS",
+    "equipoObjetivo": "ANTITERRORISTAS",
+    "idempotencyKey": "captura-20261125T100926-0300-rechazo-a2"
+  },
+  "statusHttp": 409,
+  "respuesta": {
+    "timestamp": "2026-11-25T10:09:27.497761772",
+    "traceId": "aa575f8b-20b0-485b-83f8-263d59564fbe",
+    "status": 409,
+    "error": "Conflict",
+    "excepcion": "CompanneroRechazoException",
+    "mensaje": "Rechazo de A2 (HTTP 409)",
+    "path": "/escenarios/disparo-coordinado",
+    "rechazadoPor": "A2",
+    "statusRemoto": 409,
+    "cuerpoRemoto": "{\"status\":409,\"error\":\"SIN_MUNICION\",\"excepcion\":\"SinMunicionException\",\"mensaje\":\"La ráfaga necesita 1 balas y el cargador tiene 0: hay que recargar\"}",
+    "statusHttp": 409
+  }
+}

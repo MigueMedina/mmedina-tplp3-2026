@@ -1,0 +1,35 @@
+{
+  "nombre": "08-crear-fusil-sin-municion",
+  "fecha": "2026-11-25T10:09:26-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8080/armas/fusiles",
+  "cuerpoEnviado": {
+    "nombre": "captura-20261125T100926-0300-AK47-vacio",
+    "dano": 36,
+    "precision": 75,
+    "capacidadCargador": 0,
+    "precio": 2700
+  },
+  "statusHttp": 201,
+  "respuesta": {
+    "tipoArma": "fusil",
+    "automatica": true,
+    "capacidadCargador": 0,
+    "cargadoresRestantes": 3,
+    "dano": 36,
+    "id": 2,
+    "imagen": "fusil_captura-20261125t100926-0300-ak47-vacio.png",
+    "mira": 2,
+    "municionActual": 0,
+    "nombre": "captura-20261125T100926-0300-AK47-vacio",
+    "precio": 2700.0,
+    "precision": 75,
+    "rango": 30.0,
+    "recarga": 2.5,
+    "retroceso": 20,
+    "silenciador": false,
+    "sonido": "fusil_disparo.ogg",
+    "velocidad": 10.0,
+    "velocidadDisparo": 10.0
+  }
+}

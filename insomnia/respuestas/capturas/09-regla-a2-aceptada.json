@@ -1,0 +1,18 @@
+{
+  "nombre": "09-regla-a2-aceptada",
+  "fecha": "2026-11-25T10:09:26-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8081/api/reglas/municion",
+  "cuerpoEnviado": {
+    "cargador": 30,
+    "balasPorDisparo": 1,
+    "disparos": 1
+  },
+  "statusHttp": 200,
+  "respuesta": {
+    "permitido": true,
+    "cargadorAntes": 30,
+    "balasNecesarias": 1,
+    "cargadorDespues": 29
+  }
+}

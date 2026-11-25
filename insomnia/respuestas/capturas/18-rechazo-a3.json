@@ -1,0 +1,27 @@
+{
+  "nombre": "18-rechazo-a3",
+  "fecha": "2026-11-25T10:09:27-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8080/escenarios/disparo-coordinado",
+  "cuerpoEnviado": {
+    "jugadorId": 1,
+    "armaId": 1,
+    "equipoTirador": "TERRORISTAS",
+    "equipoObjetivo": "TERRORISTAS",
+    "idempotencyKey": "captura-20261125T100926-0300-rechazo-a3"
+  },
+  "statusHttp": 409,
+  "respuesta": {
+    "timestamp": "2026-11-25T10:09:27.740296441",
+    "traceId": "d9dbcef1-1109-4a1a-8295-6e6c6f008c30",
+    "status": 409,
+    "error": "Conflict",
+    "excepcion": "CompanneroRechazoException",
+    "mensaje": "Rechazo de A3 (HTTP 422)",
+    "path": "/escenarios/disparo-coordinado",
+    "rechazadoPor": "A3",
+    "statusRemoto": 422,
+    "cuerpoRemoto": "{\"status\":422,\"codigo\":\"DISPARO_NO_PERMITIDO\",\"excepcion\":\"DisparoNoPermitidoException\",\"mensaje\":\"Fuego amigo: A1-MigueMedina y captura-20261125T100926-0300-objetivo son del mismo equipo (TERRORISTAS)\"}",
+    "statusHttp": 409
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "nombre": "19-validacion-400",
+  "fecha": "2026-11-25T10:09:27-03:00",
+  "metodo": "POST",
+  "url": "http://localhost:8080/escenarios/disparo-coordinado",
+  "cuerpoEnviado": {
+    "armaId": 1,
+    "idempotencyKey": "captura-20261125T100926-0300-invalido"
+  },
+  "statusHttp": 400,
+  "respuesta": {
+    "timestamp": "2026-11-25T10:09:27.795953651",
+    "traceId": "53939228-2e50-444d-91a5-bc17442b010c",
+    "status": 400,
+    "error": "Bad Request",
+    "excepcion": "MethodArgumentNotValidException",
+    "mensaje": "jugadorId: no debe ser nulo",
+    "path": "/escenarios/disparo-coordinado",
+    "campo": "jugadorId",
+    "errores": {
+      "jugadorId": "no debe ser nulo"
+    }
+  }
+}

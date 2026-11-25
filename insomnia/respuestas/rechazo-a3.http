@@ -2,13 +2,13 @@ HTTP/1.1 409 Conflict
 Content-Type: application/json
 
 {
-  "timestamp": "2026-11-22T17:47:36.882",
+  "timestamp": "2026-11-24T23:20:12.482",
   "status": 409,
   "error": "Conflict",
   "excepcion": "CompanneroRechazoException",
-  "mensaje": "Rechazo de A3 (HTTP 409)",
+  "mensaje": "Rechazo de A3 (HTTP 422)",
   "path": "/escenarios/disparo-coordinado",
   "rechazadoPor": "A3",
-  "statusRemoto": 409,
-  "cuerpoRemoto": "{\"excepcion\":\"JugadorEliminadoException\"}"
+  "statusRemoto": 422,
+  "cuerpoRemoto": "{\"status\":422,\"codigo\":\"DISPARO_NO_PERMITIDO\",\"excepcion\":\"DisparoNoPermitidoException\",\"mensaje\":\"El objetivo Neo ya está eliminado: no puede recibir daño\"}"
 }
