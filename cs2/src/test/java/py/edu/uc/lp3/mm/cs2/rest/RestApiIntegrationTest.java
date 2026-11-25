@@ -1,5 +1,6 @@
 package py.edu.uc.lp3.mm.cs2.rest;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,6 +57,28 @@ class RestApiIntegrationTest {
         mockMvc.perform(get("/armas"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].tipoArma").value("fusil"));
+    }
+
+    @Test
+    void listaElCatalogoCS2SinTocarLaBase() throws Exception {
+        long antes = armaRepository.count();
+
+        mockMvc.perform(get("/api/catalogo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.modelo=='AK47')].equipo", hasItem("TT")))
+                .andExpect(jsonPath("$[?(@.modelo=='AWP')].alcanceMetros", hasItem(200)))
+                .andExpect(jsonPath("$[0].traceId").doesNotExist());
+
+        assertEquals(antes, armaRepository.count());
+    }
+
+    @Test
+    void unParametroNoNumericoResponde400Tipado() throws Exception {
+        mockMvc.perform(get("/escenarios/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.traceId").exists())
+                .andExpect(jsonPath("$.excepcion").value("MethodArgumentTypeMismatchException"));
     }
 
     @Test

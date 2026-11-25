@@ -21,6 +21,12 @@ public class ApiPaths {
 	public static final String SIMULACION_HISTORIAL = SIMULACION + "/historial";
 	public static final String SIMULACION_HISTORIAL_JUGADOR = SIMULACION_HISTORIAL + "/jugador/{jugadorId}";
 
+	public static final String CATALOGO = "/api/catalogo";
+
+	public static final String COMPANEROS = "/api/companeros";
+	public static final String COMPANEROS_MUNICION = COMPANEROS + "/municion";
+	public static final String COMPANEROS_DANIO = COMPANEROS + "/danio";
+
 	public static final String REGLAS = "/api/reglas";
 	public static final String REGLAS_MUNICION = REGLAS + "/municion";
 	public static final String REGLAS_JUGADOR_VIVO = REGLAS + "/jugador-vivo";

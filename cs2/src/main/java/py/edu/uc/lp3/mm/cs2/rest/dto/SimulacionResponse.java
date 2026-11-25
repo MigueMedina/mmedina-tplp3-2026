@@ -3,6 +3,8 @@ package py.edu.uc.lp3.mm.cs2.rest.dto;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
+import org.hibernate.Hibernate;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import py.edu.uc.lp3.mm.cs2.domain.Simulacion;
@@ -33,7 +35,7 @@ public record SimulacionResponse(
                 simulacion.getJugador().isVivo(),
                 simulacion.getArma().getId(),
                 simulacion.getArma().getNombre(),
-                simulacion.getArma().getClass().getSimpleName().toLowerCase(Locale.ROOT),
+                Hibernate.getClass(simulacion.getArma()).getSimpleName().toLowerCase(Locale.ROOT),
                 simulacion.getDano(),
                 simulacion.getFecha());
     }

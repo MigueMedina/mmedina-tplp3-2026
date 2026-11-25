@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -60,7 +62,7 @@ public class SimulacionController {
                                     """)
                     }))
     })
-    public ResponseEntity<SimulacionResponse> disparar(@RequestBody DisparoRequest request) {
+    public ResponseEntity<SimulacionResponse> disparar(@Valid @RequestBody DisparoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(simulacionService.disparar(request));
     }

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -70,7 +72,7 @@ public class ArmaCrudController {
             @ApiResponse(responseCode = "201", description = "Arma creada con `tipoArma`."),
             @ApiResponse(responseCode = "400", description = "Datos inválidos, por ejemplo precio negativo.")
     })
-    public ResponseEntity<Arma> crear(@RequestBody ArmaRequest request) {
+    public ResponseEntity<Arma> crear(@Valid @RequestBody ArmaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(armaService.crear(request));
     }
 
@@ -81,7 +83,7 @@ public class ArmaCrudController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos."),
             @ApiResponse(responseCode = "404", description = "No existe un arma con ese id.")
     })
-    public Arma actualizar(@PathVariable Integer id, @RequestBody ArmaRequest request) {
+    public Arma actualizar(@PathVariable Integer id, @Valid @RequestBody ArmaRequest request) {
         return armaService.actualizar(id, request);
     }
 
@@ -114,14 +116,14 @@ public class ArmaCrudController {
     @PostMapping("/fusiles")
     @Operation(operationId = "crearFusil", summary = "Crear un fusil persistente")
     @ApiResponse(responseCode = "201", description = "Fusil creado.")
-    public ResponseEntity<Fusil> crearFusil(@RequestBody ArmaRequest request) {
+    public ResponseEntity<Fusil> crearFusil(@Valid @RequestBody ArmaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(fusilService.crear(request));
     }
 
     @PutMapping("/fusiles/{id}")
     @Operation(operationId = "actualizarFusil", summary = "Actualizar un fusil")
     @ApiResponse(responseCode = "404", description = "No existe un fusil con ese id.")
-    public Fusil actualizarFusil(@PathVariable Integer id, @RequestBody ArmaRequest request) {
+    public Fusil actualizarFusil(@PathVariable Integer id, @Valid @RequestBody ArmaRequest request) {
         return fusilService.actualizar(id, request);
     }
 
@@ -151,14 +153,14 @@ public class ArmaCrudController {
     @PostMapping("/granadas")
     @Operation(operationId = "crearGranada", summary = "Crear una granada persistente")
     @ApiResponse(responseCode = "201", description = "Granada creada.")
-    public ResponseEntity<Granada> crearGranada(@RequestBody ArmaRequest request) {
+    public ResponseEntity<Granada> crearGranada(@Valid @RequestBody ArmaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(granadaService.crear(request));
     }
 
     @PutMapping("/granadas/{id}")
     @Operation(operationId = "actualizarGranada", summary = "Actualizar una granada")
     @ApiResponse(responseCode = "404", description = "No existe una granada con ese id.")
-    public Granada actualizarGranada(@PathVariable Integer id, @RequestBody ArmaRequest request) {
+    public Granada actualizarGranada(@PathVariable Integer id, @Valid @RequestBody ArmaRequest request) {
         return granadaService.actualizar(id, request);
     }
 

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -51,7 +53,7 @@ public class JugadorController {
     @Operation(operationId = "crearJugador", summary = "Crear un jugador con vida 100",
             description = "Si se indica `blindaje`, se persiste un Chaleco con esa durabilidad inicial.")
     @ApiResponse(responseCode = "201", description = "Jugador creado.")
-    public ResponseEntity<JugadorResponse> crear(@RequestBody JugadorRequest request) {
+    public ResponseEntity<JugadorResponse> crear(@Valid @RequestBody JugadorRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(JugadorResponse.desde(jugadorService.crear(request)));
     }
@@ -62,7 +64,7 @@ public class JugadorController {
             @ApiResponse(responseCode = "200", description = "Jugador actualizado."),
             @ApiResponse(responseCode = "404", description = "No existe un jugador con ese id.")
     })
-    public JugadorResponse actualizar(@PathVariable Long id, @RequestBody JugadorRequest request) {
+    public JugadorResponse actualizar(@PathVariable Long id, @Valid @RequestBody JugadorRequest request) {
         return JugadorResponse.desde(jugadorService.actualizar(id, request));
     }
 

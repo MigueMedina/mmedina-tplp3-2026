@@ -40,6 +40,11 @@ public class SimulacionService {
 
     @Transactional
     public SimulacionResponse disparar(DisparoRequest request) {
+        return SimulacionResponse.desde(dispararEntidad(request));
+    }
+
+    @Transactional
+    public Simulacion dispararEntidad(DisparoRequest request) {
         if (request == null || request.jugadorId() == null || request.armaId() == null) {
             throw new DatosInvalidosException("Debe indicar jugadorId y armaId para simular el disparo");
         }
@@ -80,7 +85,7 @@ public class SimulacionService {
         Simulacion simulacion = simulacionRepository.save(
                 new Simulacion(jugador, arma, dano, vidaAntes, vidaDespues));
 
-        return SimulacionResponse.desde(simulacion);
+        return simulacion;
     }
 
     @Transactional(readOnly = true)

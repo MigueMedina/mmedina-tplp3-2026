@@ -1,6 +1,7 @@
 package py.edu.uc.lp3.mm.cs2.rest.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * DTO de entrada para crear y actualizar armas. Los campos nulos se completan
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(description = "Datos para crear o actualizar un arma de la jerarquía CS2.")
 public record ArmaRequest(
+        @Pattern(regexp = "(?i)fusil|pistola|escopeta|awp|flash|humo|granada")
         @Schema(description = "Subtipo de arma: fusil, pistola, escopeta, awp, flash, humo o granada.", example = "fusil") String tipo,
         @Schema(description = "Nombre comercial del arma.", example = "AK-47") String nombre,
         @Schema(description = "Precio en dinero del juego.", example = "2700") Double precio,
