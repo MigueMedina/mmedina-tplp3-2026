@@ -43,6 +43,27 @@ class ReglasRestIntegrationTest {
     }
 
     @Test
+    void losAliasesConLosOperationIdEsperadosPorUnCompaneroFuncionan() throws Exception {
+        mockMvc.perform(post("/api/companeros/municion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"carga\":1,\"dano\":30}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.permitido").value(true));
+
+        mockMvc.perform(post("/api/companeros/danio")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"vida\":50,\"blindaje\":20}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.permitido").value(true));
+
+        mockMvc.perform(post("/api/companeros/danio")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"vida\":0}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.excepcion").value("JugadorEliminadoException"));
+    }
+
+    @Test
     void laConsultaDeJugadorVivoAceptaYRechazaSinTocarLaBase() throws Exception {
         mockMvc.perform(post("/api/reglas/jugador-vivo")
                         .contentType(MediaType.APPLICATION_JSON)

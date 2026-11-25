@@ -30,6 +30,15 @@ class OpenApiDocumentationTest {
         assertTrue(documento.contains("/api/reglas"));
         assertTrue(documento.contains("/api/reglas/municion"));
         assertTrue(documento.contains("/api/reglas/jugador-vivo"));
+        assertTrue(documento.contains("/api/catalogo"));
+        assertTrue(documento.contains("/api/companeros/municion"));
+        assertTrue(documento.contains("/api/companeros/danio"));
+        assertTrue(documento.contains("\"operationId\":\"municion\""));
+        assertTrue(documento.contains("\"operationId\":\"danio\""));
+        assertTrue(documento.contains("CatalogoArmaResponse"));
+        assertTrue(documento.contains("ErrorResponse"));
+        assertTrue(documento.contains("ErrorCompaneroResponse"));
+        assertTrue(documento.contains("ErrorValidacionResponse"));
         assertTrue(documento.contains("MunicionInsuficienteException"));
         assertTrue(documento.contains("JugadorEliminadoException"));
         assertTrue(documento.contains("simularDisparo"));

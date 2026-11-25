@@ -8,14 +8,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import py.edu.uc.lp3.mm.cs2.constants.ApiPaths;
+import py.edu.uc.lp3.mm.cs2.rest.dto.ErrorResponse;
 import py.edu.uc.lp3.mm.cs2.rest.dto.ReglaConsultaRequest;
 import py.edu.uc.lp3.mm.cs2.rest.dto.ReglaJugadorVivoResponse;
 import py.edu.uc.lp3.mm.cs2.rest.dto.ReglaMunicionResponse;
@@ -47,15 +51,17 @@ public class ReglasController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Munición suficiente."),
             @ApiResponse(responseCode = "400", description = "Faltan campos o son imposibles.",
-                    content = @Content(examples = @ExampleObject(name = "DatosInvalidosException", value = """
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                     examples = @ExampleObject(name = "DatosInvalidosException", value = """
                             {"excepcion":"DatosInvalidosException","mensaje":"La carga del cargador no puede ser negativa"}
                             """))),
             @ApiResponse(responseCode = "409", description = "El cargador está vacío.",
-                    content = @Content(examples = @ExampleObject(name = "MunicionInsuficienteException", value = """
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                     examples = @ExampleObject(name = "MunicionInsuficienteException", value = """
                             {"excepcion":"MunicionInsuficienteException","mensaje":"No hay munición suficiente: cargador en 0 y se necesita 1 bala"}
                             """)))
     })
-    public ReglaMunicionResponse validarMunicion(@RequestBody ReglaConsultaRequest request) {
+    public ReglaMunicionResponse validarMunicion(@Valid @RequestBody ReglaConsultaRequest request) {
         return reglasService.validarMunicion(request);
     }
 
@@ -68,15 +74,17 @@ public class ReglasController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "El jugador sigue vivo."),
             @ApiResponse(responseCode = "400", description = "Vida o blindaje fuera de rango.",
-                    content = @Content(examples = @ExampleObject(name = "DatosInvalidosException", value = """
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                     examples = @ExampleObject(name = "DatosInvalidosException", value = """
                             {"excepcion":"DatosInvalidosException","mensaje":"La vida del jugador debe estar entre 0 y 100"}
                             """))),
             @ApiResponse(responseCode = "409", description = "El jugador ya fue eliminado.",
-                    content = @Content(examples = @ExampleObject(name = "JugadorEliminadoException", value = """
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                     examples = @ExampleObject(name = "JugadorEliminadoException", value = """
                             {"excepcion":"JugadorEliminadoException","mensaje":"El jugador ya fue eliminado: vida 0"}
                             """)))
     })
-    public ReglaJugadorVivoResponse validarJugadorVivo(@RequestBody ReglaConsultaRequest request) {
+    public ReglaJugadorVivoResponse validarJugadorVivo(@Valid @RequestBody ReglaConsultaRequest request) {
         return reglasService.validarJugadorVivo(request);
     }
 }
