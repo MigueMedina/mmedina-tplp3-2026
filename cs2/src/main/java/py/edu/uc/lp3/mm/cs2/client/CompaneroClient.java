@@ -12,6 +12,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 import py.edu.uc.lp3.mm.cs2.exception.CompanneroRechazoException;
+import py.edu.uc.lp3.mm.cs2.exception.CompaneroNoDisponibleException;
 
 @Service
 public class CompaneroClient {
@@ -34,9 +35,9 @@ public class CompaneroClient {
         try {
             operacion = resolver.resolver(configuracion, rol);
         } catch (RuntimeException excepcion) {
-            throw new CompanneroRechazoException(rol, 503,
+            throw new CompaneroNoDisponibleException(rol, 503, 0,
                     "No se pudo leer el OpenAPI de " + rol.getEtiqueta() + ": " + excepcion.getMessage(),
-                    excepcion);
+                    null, excepcion);
         }
 
         Map<String, Object> cuerpo = construirCuerpo(configuracion, regla);
@@ -59,37 +60,46 @@ public class CompaneroClient {
                     respuesta.getBody(), descripcionOperacion);
         } catch (CompanneroRechazoException excepcion) {
             throw excepcion;
+        } catch (CompaneroNoDisponibleException excepcion) {
+            throw excepcion;
         } catch (RestClientResponseException excepcion) {
-            throw new CompanneroRechazoException(rol, excepcion.getStatusCode().value(),
+            int statusRemoto = excepcion.getStatusCode().value();
+            if (statusRemoto >= 500) {
+                throw new CompaneroNoDisponibleException(rol,
+                        statusRemoto == 504 ? 504 : 502, statusRemoto,
+                        rol.getEtiqueta() + " no está disponible (HTTP " + statusRemoto + ")",
+                        excepcion.getResponseBodyAsString(), excepcion);
+            }
+            throw new CompanneroRechazoException(rol, statusRemoto,
                     excepcion.getResponseBodyAsString(), excepcion);
         } catch (RestClientException excepcion) {
-            throw new CompanneroRechazoException(rol, 503,
-                    rol.getEtiqueta() + " no respondió: " + excepcion.getMessage(), excepcion);
+            throw new CompaneroNoDisponibleException(rol, 503, 0,
+                    rol.getEtiqueta() + " no respondió: " + excepcion.getMessage(),
+                    null, excepcion);
         }
     }
 
     private Map<String, Object> construirCuerpo(ApiClientesProperties.Companero configuracion,
                                                 ReglaRequest regla) {
         Map<String, Object> cuerpo = new LinkedHashMap<>();
-        ApiClientesProperties.Cuerpo campos = configuracion.getCuerpo();
-        if (regla.jugadorId() != null && campos.getJugadorId() != null) {
-            cuerpo.put(campos.getJugadorId(), regla.jugadorId());
-        }
-        if (regla.armaId() != null && campos.getArmaId() != null) {
-            cuerpo.put(campos.getArmaId(), regla.armaId());
-        }
-        if (regla.dano() != null && campos.getDano() != null) {
-            cuerpo.put(campos.getDano(), regla.dano());
-        }
+        regla.valores().forEach((clave, valor) -> {
+            String nombreRemoto = configuracion.getCuerpo().get(clave);
+            if (nombreRemoto == null || nombreRemoto.isBlank()) {
+                throw new IllegalStateException(
+                        "Falta el mapeo del campo '" + clave + "' para " + configuracion.getOperationId());
+            }
+            cuerpo.put(nombreRemoto, valor);
+        });
         return cuerpo;
     }
 
     private String construirUrl(ApiClientesProperties.Companero configuracion,
                                 OpenApiOperationResolver.OperacionRemota operacion) {
-        String servidor = operacion.servidor();
-        String base = servidor != null && servidor.startsWith("http")
-                ? servidor
-                : configuracion.getBaseUrl();
+        String base = configuracion.getBaseUrl();
+        if (base == null || base.isBlank()) {
+            String servidor = operacion.servidor();
+            base = servidor != null && servidor.startsWith("http") ? servidor : null;
+        }
         if (base == null || base.isBlank()) {
             throw new IllegalStateException("Falta la URL base de " + configuracion.getOperationId());
         }

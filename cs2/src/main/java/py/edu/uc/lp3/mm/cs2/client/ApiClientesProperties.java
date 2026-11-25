@@ -1,5 +1,9 @@
 package py.edu.uc.lp3.mm.cs2.client;
 
+import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -7,8 +11,26 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "apis")
 public class ApiClientesProperties {
 
-    private final Companero a2 = new Companero();
-    private final Companero a3 = new Companero();
+    private final Companero a2 = new Companero("http://localhost:8081", "municion");
+    private final Companero a3 = new Companero("http://localhost:8082", "danio");
+    private Duration connectTimeout = Duration.ofSeconds(2);
+    private Duration readTimeout = Duration.ofSeconds(5);
+
+    public Duration getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(Duration connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    public Duration getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(Duration readTimeout) {
+        this.readTimeout = readTimeout;
+    }
 
     public Companero getA2() {
         return a2;
@@ -28,7 +50,15 @@ public class ApiClientesProperties {
         private String openapiUrl;
         private String operationId;
         private String metodo = "POST";
-        private final Cuerpo cuerpo = new Cuerpo();
+        private final Map<String, String> cuerpo = new LinkedHashMap<>();
+
+        public Companero() {
+        }
+
+        public Companero(String baseUrl, String operationId) {
+            this.baseUrl = baseUrl;
+            this.operationId = operationId;
+        }
 
         public String getBaseUrl() {
             return baseUrl;
@@ -64,39 +94,15 @@ public class ApiClientesProperties {
             this.metodo = metodo;
         }
 
-        public Cuerpo getCuerpo() {
+        public Map<String, String> getCuerpo() {
             return cuerpo;
         }
-    }
 
-    public static class Cuerpo {
-
-        private String jugadorId = "jugadorId";
-        private String armaId = "armaId";
-        private String dano = "dano";
-
-        public String getJugadorId() {
-            return jugadorId;
-        }
-
-        public void setJugadorId(String jugadorId) {
-            this.jugadorId = jugadorId;
-        }
-
-        public String getArmaId() {
-            return armaId;
-        }
-
-        public void setArmaId(String armaId) {
-            this.armaId = armaId;
-        }
-
-        public String getDano() {
-            return dano;
-        }
-
-        public void setDano(String dano) {
-            this.dano = dano;
+        public void setCuerpo(Map<String, String> cuerpo) {
+            this.cuerpo.clear();
+            if (cuerpo != null) {
+                this.cuerpo.putAll(cuerpo);
+            }
         }
     }
 }
