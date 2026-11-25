@@ -26,35 +26,42 @@ ejercicio de Classroom de 10 puntos y no se califica aquí.
 
 ## Mapa A1 / A2 / A3
 
-Los datos de A2 y A3 se completan con los compañeros del grupo CS2 acordado.
-Hasta entonces quedan como placeholders y las variables de entorno permiten
-reemplazarlos sin tocar código.
+A1 es este repositorio, A2 es Fabricio (`fg-taller-git-2026`) y A3 es Joaquín
+(`jb-taller-git-2026`). Las variables de entorno permiten reemplazar las URLs
+sin tocar código.
 
 | Rol | Dueño | Juego | URL base | OpenAPI | Regla consultada en una frase |
 |---|---|---|---|---|---|
 | A1 | Este repositorio | Counter-Strike 2 | `http://localhost:8080` | `http://localhost:8080/v3/api-docs` | Orquesta el disparo coordinado y persiste la jugada cuando A2 y A3 aceptan. |
-| A2 | **Pendiente de grupo CS2** | Counter-Strike 2 | `A2_BASE_URL` / `http://localhost:8081` | `A2_OPENAPI_URL` / `http://localhost:8081/v3/api-docs` | Valida que el arma tenga munición suficiente para el disparo. |
-| A3 | **Pendiente de grupo CS2** | Counter-Strike 2 | `A3_BASE_URL` / `http://localhost:8082` | `A3_OPENAPI_URL` / `http://localhost:8082/v3/api-docs` | Valida que el jugador objetivo siga vivo. |
+| A2 | Fabricio G. | Counter-Strike 2 | `A2_BASE_URL` / `http://localhost:8081` | `A2_OPENAPI_URL` / `http://localhost:8081/v3/api-docs` | `POST /api/reglas/municion` (`municion`) valida `cargador`, `balasPorDisparo` y `disparos`. |
+| A3 | Joaquín B. | Counter-Strike 2 | `A3_BASE_URL` / `http://localhost:8082` | `A3_OPENAPI_URL` / `http://localhost:8082/v3/api-docs` | `POST /api/reglas/danio` (`danio`) valida tirador, equipos, vida, blindaje y daño del objetivo. |
 
 Las rutas de los compañeros no están copiadas como constantes de dominio: se
 resuelven en tiempo de ejecución desde cada OpenAPI. Los `operationId`
-configurados por defecto son `validarMunicion` para A2 y `validarJugadorVivo`
-para A3; ambos se pueden cambiar por variable de entorno.
+configurados por defecto son `municion` para A2 y `danio` para A3; ambos se
+pueden cambiar por variable de entorno.
 
-Para que el grupo pueda rotar, este servicio publica sus dos reglas con esos
-mismos `operationId`: `GET /api/reglas`, `POST /api/reglas/municion` y
+Para que el grupo pueda rotar, este servicio publica sus dos reglas con los
+`operationId` propios `validarMunicion` y `validarJugadorVivo`:
+`GET /api/reglas`, `POST /api/reglas/municion` y
 `POST /api/reglas/jugador-vivo`. No usan repositorios ni escriben en H2. La
-ficha para quien nos consulte como A2 o A3 está en `Docs/PARA-COMPANEROS.md`.
+guía para quien nos consulte como A2 o A3 está en
+`Docs/doc-para-companeros.md`.
 
 ## Escenario en una frase
 
 Un cliente llama sólo a A1 con `POST /escenarios/disparo-coordinado`; A1 le
-pregunta a A2 si el arma tiene munición y a A3 si el jugador está vivo, y sólo si
-los dos aceptan guarda en H2 la simulación, las dos aprobaciones y la fecha del
-escenario.
+pregunta a A2 si hay munición (`municion`) y a A3 si el daño contra el objetivo
+es legal (`danio`), y sólo si los dos responden 2xx con `permitido:true` guarda
+en H2 la simulación, las dos aprobaciones y la fecha del escenario.
 
-El lugar del cuerpo de A1 es `{"jugadorId":1,"armaId":1}`. El cliente no necesita
-conocer las rutas ajenas: A1 construye los pedidos con lo que dice cada OpenAPI.
+El cuerpo de A1 es
+`{"jugadorId":1,"armaId":1,"equipoTirador":"TERRORISTAS","equipoObjetivo":"ANTITERRORISTAS","idempotencyKey":"escenario-001"}`;
+los equipos son opcionales y por defecto el tirador es `TERRORISTAS` y el
+objetivo `ANTITERRORISTAS`. Repetir la misma `idempotencyKey` devuelve el
+escenario ya guardado sin consultar a los compañeros ni escribir de nuevo. El
+cliente no necesita conocer las rutas ajenas: A1 construye los pedidos con lo que
+dice cada OpenAPI, prefiere la `base-url` configurada y cachea la ruta 5 minutos.
 
 ## Criterios del challenge
 
@@ -62,8 +69,8 @@ conocer las rutas ajenas: A1 construye los pedidos con lo que dice cada OpenAPI.
 |---|---|---|---|
 | 1 | OpenAPI propio | `/v3/api-docs` y `/swagger-ui.html`; CRUD, simulación y errores 400/404/409 documentados con `@Tag`, `@Operation`, `@ApiResponses` y `@Schema`. | 0-3 |
 | 2 | Round robin | Tabla A1/A2/A3 en este archivo y en el README; URLs configurables y reglas citadas en una frase. | 0-3 |
-| 3 | Consumo | `OpenApiOperationResolver`, `CompaneroClient`, `ApiClientesProperties` y `ClientHttpConfig`: leen los OpenAPI, resuelven `operationId`, cachean la ruta y hacen HTTP real con `RestClient`. | 0-3 |
-| 4 | Escenario persistido | `EscenarioController`, `EscenarioService`, `EscenarioCoordinado`, `EscenarioRepository`, `GET /escenarios` y `GET /escenarios/{id}`; rechazo 409 atribuido a A2 o A3 y sin escrituras. | 0-3 |
+| 3 | Consumo | `OpenApiOperationResolver`, `CompaneroClient`, `ApiClientesProperties` y `ClientHttpConfig`: leen los OpenAPI, resuelven `operationId`, cachean la ruta con TTL, prefieren la base configurada, aplican timeouts/buffering y hacen HTTP real con `RestClient`. | 0-3 |
+| 4 | Escenario persistido | `EscenarioController`, `EscenarioService`, `EscenarioCoordinado`, `EscenarioRepository`, `GET /escenarios` y `GET /escenarios/{id}`; HTTP fuera de la transacción, revalidación con `@Version`, idempotencia, rechazo 409 atribuido y sin escrituras. | 0-3 |
 | 5 | Corrección POO-08 | Sección del README con cada observación y su cierre. | 3 |
 
 ## Flujo del escenario feliz
@@ -72,18 +79,19 @@ conocer las rutas ajenas: A1 construye los pedidos con lo que dice cada OpenAPI.
 sequenceDiagram
     actor Cliente as Insomnia / cliente HTTP
     participant A1 as A1 (CS2, escenario)
-    participant A2 as A2 (regla de munición)
-    participant A3 as A3 (regla de jugador vivo)
+    participant A2 as A2 (Fabricio, munición)
+    participant A3 as A3 (Joaquín, daño)
 
-    Cliente->>A1: POST /escenarios/disparo-coordinado
+    Cliente->>A1: POST /escenarios/disparo-coordinado + idempotencyKey
+    A1->>A1: si la clave ya existe, devuelve el escenario guardado
     A1->>A2: GET /v3/api-docs
-    A2-->>A1: operationId + servidor + ruta
-    A1->>A2: POST validar munición
-    A2-->>A1: 200 aprobado
+    A2-->>A1: operationId "municion" + servidor + ruta
+    A1->>A2: POST cargador / balasPorDisparo / disparos
+    A2-->>A1: 200 permitido:true
     A1->>A3: GET /v3/api-docs
-    A3-->>A1: operationId + servidor + ruta
-    A1->>A3: POST validar jugador vivo
-    A3-->>A1: 200 aprobado
+    A3-->>A1: operationId "danio" + servidor + ruta
+    A1->>A3: POST tirador / equipos / objetivo / vida / blindaje / danio
+    A3-->>A1: 200 permitido:true
     A1->>A1: dispara y guarda EscenarioCoordinado en H2
     A1-->>Cliente: 201 con simulación, a2 y a3
 ```
@@ -94,14 +102,14 @@ sequenceDiagram
 sequenceDiagram
     actor Cliente as Insomnia / cliente HTTP
     participant A1 as A1 (CS2, escenario)
-    participant A2 as A2 (regla de munición)
-    participant A3 as A3 (regla de jugador vivo)
+    participant A2 as A2 (Fabricio, munición)
+    participant A3 as A3 (Joaquín, daño)
 
     Cliente->>A1: POST /escenarios/disparo-coordinado
     A1->>A2: validar munición
-    A2-->>A1: 200 aprobado
-    A1->>A3: validar jugador vivo
-    A3-->>A1: 409 rechazo
+    A2-->>A1: 200 permitido:true
+    A1->>A3: validar daño contra el objetivo
+    A3-->>A1: 422 rechazo
     A1->>A1: no guarda escenario ni simulación
     A1-->>Cliente: 409 con rechazadoPor = A3
 ```
@@ -115,29 +123,45 @@ Archivo: `cs2/src/main/resources/application.properties`.
 
 | Propiedad | Valor por defecto | Uso |
 |---|---|---|
-| `apis.a2.base-url` | `http://localhost:8081` | URL base de A2. |
+| `apis.a2.base-url` | `http://localhost:8081` | URL base de Fabricio (A2). |
 | `apis.a2.openapi-url` | vacía | Si está vacía se deriva `/v3/api-docs` de la base. |
-| `apis.a2.operation-id` | `validarMunicion` | Operación buscada en el documento de A2. |
-| `apis.a2.request.*` | nombres de BodyDto | Permite adaptar los nombres de campos del JSON sin cambiar Java. |
-| `apis.a3.base-url` | `http://localhost:8082` | URL base de A3. |
+| `apis.a2.operation-id` | `municion` | Operación buscada en el documento de A2. |
+| `apis.a2.cuerpo.*` | `cargador`, `balasPorDisparo`, `disparos` | Nombres de las claves del JSON enviado a A2. |
+| `apis.a3.base-url` | `http://localhost:8082` | URL base de Joaquín (A3). |
 | `apis.a3.openapi-url` | vacía | Si está vacía se deriva `/v3/api-docs` de la base. |
-| `apis.a3.operation-id` | `validarJugadorVivo` | Operación buscada en el documento de A3. |
-| `apis.a3.request.*` | nombres de BodyDto | Permite adaptar los nombres de campos del JSON sin cambiar Java. |
+| `apis.a3.operation-id` | `danio` | Operación buscada en el documento de A3. |
+| `apis.a3.cuerpo.*` | `tirador`, `equipoTirador`, `objetivo`, `equipoObjetivo`, `vidaObjetivo`, `blindajeObjetivo`, `danio` | Nombres de las claves del JSON enviado a A3. |
+| `apis.connect-timeout` | `2s` | Timeout de conexión; variable `APIS_CONNECT_TIMEOUT`. |
+| `apis.read-timeout` | `5s` | Timeout de lectura; variable `APIS_READ_TIMEOUT`. |
 
 También se pueden pasar como variables de entorno, por ejemplo:
 
 ```bash
 A2_BASE_URL=http://localhost:8081 \
-A2_OPERATION_ID=validarMunicion \
+A2_OPERATION_ID=municion \
 A3_BASE_URL=http://localhost:8082 \
-A3_OPERATION_ID=validarJugadorVivo \
+A3_OPERATION_ID=danio \
 bash ./mvnw spring-boot:run
 ```
 
 `OpenApiOperationResolver` guarda en caché la ruta resuelta por rol, operación y
-URL del documento. Si el compañero cambia el nombre de la ruta pero actualiza su
-OpenAPI, A1 vuelve a resolverlo desde el documento; no hay reglas copiadas de su
-código ni rutas escritas a mano en el dominio.
+URL del documento durante 5 minutos; luego la resuelve de nuevo. Si el compañero
+cambia el nombre de la ruta pero actualiza su OpenAPI, A1 lo detecta en el próximo
+refresco; no hay reglas copiadas de su código ni rutas escritas a mano en el
+dominio. La `base-url` configurada gana sobre el `servers[0].url` remoto, y si
+falta un mapeo de cuerpo configurado el cliente falla rápido.
+
+### Mapa rápido de `operationId` y payload
+
+- A1 consume de A2 `municion` con `cargador`, `balasPorDisparo` y `disparos`.
+- A1 consume de A3 `danio` con `tirador`, `equipoTirador`, `objetivo`,
+  `equipoObjetivo`, `vidaObjetivo`, `blindajeObjetivo` y `danio`.
+- A1 expone para un compañero los aliases `/api/companeros/municion`
+  (`operationId=municion`, payload `carga` y `dano`) y `/api/companeros/danio`
+  (`operationId=danio`, payload `vida` y `blindaje`).
+- Las reglas originales siguen en `/api/reglas/municion` y
+  `/api/reglas/jugador-vivo`; los aliases reducen la asimetría sin romper esos
+  contratos. `GET /api/catalogo` publica las stats orientativas de las armas.
 
 ## Cómo arrancar los tres servicios
 
@@ -148,19 +172,20 @@ cd cs2
 bash ./mvnw spring-boot:run
 ```
 
-A2 y A3 son repositorios de los compañeros. Cuando se confirme el grupo, el
-README debe reemplazar estos marcadores por los enlaces reales:
+A2 es Fabricio:
 
 ```bash
-git clone <URL_REPO_A2> a2
+git clone https://github.com/FabricioG29/fg-taller-git-2026.git a2
 cd a2
-./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
+bash ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
 ```
 
+A3 es Joaquín:
+
 ```bash
-git clone <URL_REPO_A3> a3
+git clone https://github.com/joaquinBenegas0/jb-taller-git-2026.git a3
 cd a3
-./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8082
+PORT=8082 bash ./mvnw spring-boot:run
 ```
 
 Si los compañeros usan otros puertos, cambiar `A2_BASE_URL` y `A3_BASE_URL` en
@@ -171,17 +196,27 @@ el arranque de A1.
 1. Arrancar A1, A2 y A3.
 2. Abrir los tres OpenAPI: `/v3/api-docs` en los puertos 8080, 8081 y 8082.
 3. Importar `insomnia/cs2-insomnia.json` y revisar `insomnia/README.md`.
-4. Crear un jugador y un fusil con las carpetas `04 - Jugadores` y
-   `02 - Fusiles` de POO-08.
-5. Ejecutar `10 - POO-09 (APIs cruzadas)` en el orden indicado:
-   OpenAPI propios y ajenos, escenario feliz, GET del escenario, rechazo de A2,
-   rechazo de A3 y GET de comparación.
-6. Comparar las respuestas con:
-   - `insomnia/respuestas/escenario-feliz.http`
-   - `insomnia/respuestas/rechazo-a2.http`
-   - `insomnia/respuestas/rechazo-a3.http`
-7. En H2, verificar `ESCENARIOS` y `SIMULACIONES`: crecen una sola vez, en el
-   caso feliz, y no cambian después de los rechazos.
+  4. Crear un jugador y un fusil con las carpetas `04 - Jugadores` y
+     `02 - Fusiles` de POO-08.
+  5. Ejecutar `10 - POO-09 (APIs cruzadas)` en el orden indicado: catálogo,
+     aliases de `operationId`, OpenAPI propios y ajenos, validación 400,
+     escenario feliz, GET del escenario, rechazo de A2, rechazo de A3 y GET de
+     comparación.
+  6. Repetir el escenario feliz con la misma `idempotencyKey`: debe devolver el
+     mismo `id` y no consultar a los compañeros.
+  7. Comparar las respuestas con:
+     - `insomnia/respuestas/escenario-feliz.http`
+     - `insomnia/respuestas/rechazo-a2.http`
+     - `insomnia/respuestas/rechazo-a3.http`
+     - `insomnia/respuestas/companero-no-disponible.http`
+     - `insomnia/respuestas/validacion-400.http`
+  8. En H2, verificar `ESCENARIOS` y `SIMULACIONES`: crecen una sola vez, en el
+     caso feliz, y no cambian después de los rechazos, la validación ni la
+     repetición idempotente.
+  9. Para regenerar la evidencia real de los tres servicios, ejecutar
+     `bash insomnia/capturar-respuestas.sh`; deja 21 pedidos con su status y
+     cuerpo en `insomnia/respuestas/capturas/` y un índice en `resumen.md`.
+
 
 ## Cómo se atribuye el error
 
@@ -191,23 +226,30 @@ el compañero. `GlobalExceptionHandler` responde 409 con:
 ```json
 {
   "excepcion": "CompanneroRechazoException",
-  "mensaje": "Rechazo de A3 (HTTP 409)",
+  "mensaje": "Rechazo de A3 (HTTP 422)",
   "rechazadoPor": "A3",
-  "statusRemoto": 409,
-  "cuerpoRemoto": "{\"excepcion\":\"JugadorEliminadoException\"}"
+  "statusRemoto": 422,
+  "cuerpoRemoto": "{\"codigo\":\"DISPARO_NO_PERMITIDO\",\"mensaje\":\"El objetivo ya fue eliminado\"}"
 }
 ```
 
-Así el cliente distingue «falló A2» de «falló A3» sin leer código ajeno.
+Así el cliente distingue «falló A2» de «falló A3» sin leer código ajeno. Un 200
+con `permitido:false` también se considera rechazo del rol correspondiente.
 
 ## Si un compañero no responde
 
-- El cliente tiene timeouts de 2 y 5 segundos configurados en `ClientHttpConfig`.
-- Un fallo de red o una respuesta no 2xx se traduce a
-  `CompanneroRechazoException` con el rol correspondiente.
+- El cliente tiene timeouts de 2 y 5 segundos configurables con
+  `APIS_CONNECT_TIMEOUT` y `APIS_READ_TIMEOUT`; las respuestas se leen con buffering.
+- Un fallo de red o un 5xx se traduce a `CompaneroNoDisponibleException`, que el
+  handler convierte en 502 (o 504 si el remoto devolvió 504) con `traceId`,
+  `statusRemoto` y `cuerpoRemoto`.
+- Las consultas HTTP ocurren fuera de la transacción; justo antes de escribir se
+  releen las entidades y un cambio concurrente produce 409 por `@Version`.
 - El repositorio deja respuestas de ejemplo en `insomnia/respuestas/` para que
-  la corrección pueda verificar el feliz y cada rechazo aunque A2 o A3 estén
-  apagados.
+  la corrección pueda verificar el feliz, cada rechazo y la no disponibilidad
+  aunque A2 o A3 estén apagados. Además, `insomnia/capturar-respuestas.sh`
+  regenera respuestas reales de los tres servicios con pedido, URL, status y
+  cuerpo; el índice está en `insomnia/respuestas/capturas/resumen.md`.
 
 ## Pruebas automatizadas
 
@@ -220,10 +262,17 @@ Cubren:
 
 - generación del documento OpenAPI 3.0 y presencia de operaciones/errores;
 - consultas stateless de las dos reglas propias, con casos 200, 400 y 409;
-- resolución de rutas desde un `/v3/api-docs` simulado y uso de `servers`;
-- construcción del cliente por rol y conversión de rechazos;
-- escenario feliz y rechazos A2/A3 en el servicio, sin escrituras;
-- escenario por HTTP con `GET` posterior y cuerpo 409 con `rechazadoPor`.
+- resolución de rutas desde un `/v3/api-docs` simulado, `servers`, caché con
+  invalidación, fail-fast de mapeos y cliente contra un HTTP server real;
+- conversión de rechazos 409 y de fallos 5xx a no disponible 502;
+- escenario feliz, aprobación semántica `permitido`, rechazos A2/A3 e
+  idempotencia en el servicio, sin escrituras indebidas;
+- bloqueo optimista con `@Version` e integridad referencial del escenario;
+- catálogo CS2 expuesto por HTTP y aliases con los `operationId` `municion` y
+  `danio`,
+- escenario por HTTP con `GET` posterior, 400 de validación con `campo` y
+  `errores`, 502 sin escrituras y cuerpo 409 con `rechazadoPor`,
+- error tipado para parámetros de ruta mal tipados en vez de 500.
 
 ## Entrega
 
@@ -235,4 +284,4 @@ cierre documental.
 - Commit exacto de POO-08:
   [`4d67d6d`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/4d67d6db45af73423a9f19791ad4cb8700940213).
 - Commit exacto de POO-09:
-  [`41ab717`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/41ab7170ecb8228dad8a493427fc24f79380a006).
+  [`0d93ffe`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/0d93ffe8f04f797e75ea76a3494dfc1d1190f7f6).

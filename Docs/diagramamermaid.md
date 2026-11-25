@@ -226,18 +226,19 @@ modificarlo.
 sequenceDiagram
     actor Cliente as Insomnia / cliente HTTP
     participant A1 as A1 (CS2, escenario)
-    participant A2 as A2 (munición)
-    participant A3 as A3 (jugador vivo)
+    participant A2 as A2 (Fabricio, munición)
+    participant A3 as A3 (Joaquín, daño)
 
-    Cliente->>A1: POST /escenarios/disparo-coordinado
+    Cliente->>A1: POST /escenarios/disparo-coordinado + idempotencyKey
+    A1->>A1: si la clave ya existe, devuelve el escenario guardado
     A1->>A2: GET /v3/api-docs
-    A2-->>A1: operationId + servidor + ruta
-    A1->>A2: POST validar munición
-    A2-->>A1: 200 aprobado
+    A2-->>A1: operationId "municion" + servidor + ruta
+    A1->>A2: POST cargador / balasPorDisparo / disparos
+    A2-->>A1: 200 permitido:true
     A1->>A3: GET /v3/api-docs
-    A3-->>A1: operationId + servidor + ruta
-    A1->>A3: POST validar jugador vivo
-    A3-->>A1: 200 aprobado
+    A3-->>A1: operationId "danio" + servidor + ruta
+    A1->>A3: POST tirador / equipos / objetivo / vida / blindaje / danio
+    A3-->>A1: 200 permitido:true
     A1->>A1: dispara y guarda EscenarioCoordinado en H2
     A1-->>Cliente: 201 con simulación, a2 y a3
 ```
@@ -248,14 +249,14 @@ sequenceDiagram
 sequenceDiagram
     actor Cliente as Insomnia / cliente HTTP
     participant A1 as A1 (CS2, escenario)
-    participant A2 as A2 (munición)
-    participant A3 as A3 (jugador vivo)
+    participant A2 as A2 (Fabricio, munición)
+    participant A3 as A3 (Joaquín, daño)
 
     Cliente->>A1: POST /escenarios/disparo-coordinado
     A1->>A2: validar munición
-    A2-->>A1: 200 aprobado
-    A1->>A3: validar jugador vivo
-    A3-->>A1: 409 rechazo
+    A2-->>A1: 200 permitido:true
+    A1->>A3: validar daño contra el objetivo
+    A3-->>A1: 422 rechazo
     A1->>A1: no guarda escenario ni simulación
     A1-->>Cliente: 409 con rechazadoPor = A3
 ```

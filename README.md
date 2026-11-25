@@ -30,9 +30,11 @@ mediante una **API REST** con **Spring Boot**.
 | H2 lista para consola | URL fija `jdbc:h2:file:./data/cs2db;AUTO_SERVER=TRUE` y `/h2-console` habilitado. |
 | Documentación | Este README, `BITACORA.md`, `Docs/ESPECIFICACIONES-POO-08.md` y colección de Insomnia. |
 | OpenAPI propio | `/v3/api-docs` y `/swagger-ui.html` documentan CRUD, simulación, reglas y errores 400/404/409. |
-| Clientes A2/A3 | `OpenApiOperationResolver` lee el OpenAPI ajeno y `CompaneroClient` resuelve y cachea la ruta para cada `operationId`. |
-| Escenario persistido | `POST /escenarios/disparo-coordinado` exige dos aprobaciones y guarda `EscenarioCoordinado` en H2. |
+| Clientes A2/A3 | `OpenApiOperationResolver` lee el OpenAPI ajeno y `CompaneroClient` resuelve y cachea la ruta por 5 minutos; prefiere la `base-url` configurada. |
+| Escenario persistido | `POST /escenarios/disparo-coordinado` exige dos aprobaciones semánticas, guarda `EscenarioCoordinado` en H2 y respeta `idempotencyKey`. |
 | Atribución de rechazo | `409` con `rechazadoPor`, `statusRemoto` y `cuerpoRemoto`; la base queda igual. |
+| Compañero no disponible | `502`/`504` con `statusRemoto`, `cuerpoRemoto` y `traceId`; HTTP queda fuera de la transacción. |
+| Concurrencia y entrada | `@Version` y revalidación antes de escribir; Bean Validation responde `400` con `traceId`. |
 
 ---
 
@@ -63,45 +65,74 @@ publicado es verificable y no hay autorreferencia imposible.
 
 ## POO-09 — APIs cruzadas
 
-Este repositorio es **A1**. A2 y A3 son los dos compañeros CS2 acordados; hasta
-que se confirme el grupo, sus datos quedan como placeholders y se reemplazan con
-variables de entorno sin tocar código.
+Este repositorio es **A1**. A2 es Fabricio (`fg-taller-git-2026`) y A3 es
+Joaquín (`jb-taller-git-2026`); ambos datos se pueden reemplazar con variables de
+entorno sin tocar código.
 
 | Rol | Dueño | URL base | OpenAPI | Regla que aporta |
 |---|---|---|---|---|
 | A1 | Este repo | `http://localhost:8080` | `http://localhost:8080/v3/api-docs` | Orquesta y persiste el escenario. |
-| A2 | Pendiente de grupo CS2 | `A2_BASE_URL` / `http://localhost:8081` | `A2_OPENAPI_URL` / `http://localhost:8081/v3/api-docs` | Valida munición suficiente. |
-| A3 | Pendiente de grupo CS2 | `A3_BASE_URL` / `http://localhost:8082` | `A3_OPENAPI_URL` / `http://localhost:8082/v3/api-docs` | Valida que el jugador esté vivo. |
+| A2 | Fabricio G. | `A2_BASE_URL` / `http://localhost:8081` | `A2_OPENAPI_URL` / `http://localhost:8081/v3/api-docs` | `POST /api/reglas/municion` (`municion`) con `{cargador, balasPorDisparo, disparos}`. |
+| A3 | Joaquín B. | `A3_BASE_URL` / `http://localhost:8082` | `A3_OPENAPI_URL` / `http://localhost:8082/v3/api-docs` | `POST /api/reglas/danio` (`danio`) con `{tirador, equipoTirador, objetivo, equipoObjetivo, vidaObjetivo, blindajeObjetivo, danio}`. |
 
 **Escenario en una frase:** `POST /escenarios/disparo-coordinado` recibe
-`{"jugadorId":1,"armaId":1}`, consulta A2 y A3 en ese orden y, sólo si los dos
-aceptan, dispara y guarda en H2 la simulación junto con ambas aprobaciones. Un
-`GET /escenarios/{id}` vuelve a leer la jugada. Si A2 o A3 rechazan, responde
-`409` con `rechazadoPor` y ni `ESCENARIOS` ni `SIMULACIONES` cambian.
+`{"jugadorId":1,"armaId":1,"equipoTirador":"TERRORISTAS","equipoObjetivo":"ANTITERRORISTAS","idempotencyKey":"escenario-001"}`
+(los dos equipos son opcionales; la clave de idempotencia es obligatoria), consulta
+A2 y A3 en ese orden y, sólo si los dos responden 2xx con `permitido:true`, dispara
+y guarda en H2 la simulación junto con ambas aprobaciones. Repetir la misma
+`idempotencyKey` devuelve la jugada ya persistida sin volver a consultar ni escribir.
+Un `GET /escenarios/{id}` vuelve a leer la jugada. Si A2 o A3 rechazan, responde
+`409` con `rechazadoPor` y ni `ESCENARIOS` ni `SIMULACIONES` cambian; si no responden,
+responde `502`/`504` con `traceId`.
 
 Las rutas ajenas se resuelven en runtime desde el OpenAPI de cada compañero.
-Los `operationId` por defecto son `validarMunicion` (A2) y `validarJugadorVivo`
-(A3), configurables con `A2_OPERATION_ID` y `A3_OPERATION_ID`. El cliente lee
-también `servers[0].url` del documento y cachea la ruta por rol, operación y URL.
+Los `operationId` por defecto son `municion` (A2) y `danio` (A3), configurables
+con `A2_OPERATION_ID` y `A3_OPERATION_ID`. El cliente lee también
+`servers[0].url` del documento como fallback y prefiere la `base-url` configurada.
+La ruta se cachea por rol, operación y URL durante 5 minutos; luego se resuelve de nuevo.
 
 Para poder rotar y atender consultas como A2 o A3, este servicio también publica
 sus dos reglas sin tocar H2: `GET /api/reglas`, `POST /api/reglas/municion` y
-`POST /api/reglas/jugador-vivo`. La ficha para compañeros está en
-`Docs/PARA-COMPANEROS.md`.
+`POST /api/reglas/jugador-vivo`, con los `operationId` propios
+`validarMunicion` y `validarJugadorVivo`. La ficha para compañeros está en
+`Docs/doc-para-companeros.md`.
 
 El enunciado aplicado, el detalle de los 15 puntos y los diagramas de flujo están
 en `Docs/POO-09-enunciado-aplicado.md`.
+
+### Captura reproducible contra servicios reales
+
+Con A1, Fabricio (A2) y Joaquín (A3) levantados, ejecutar desde la raíz:
+
+```bash
+bash insomnia/capturar-respuestas.sh
+```
+
+El script recorre los tres OpenAPI, el catálogo de A1, los aliases, las reglas
+directas de A2/A3, el escenario feliz, la repetición idempotente, los dos
+rechazos y la validación 400. Guarda cada pedido y su respuesta real en
+`insomnia/respuestas/capturas/*.json` y un índice en
+`insomnia/respuestas/capturas/resumen.md`. Las URL y los commits se pueden
+pisar con `A1_BASE_URL`, `A2_BASE_URL`, `A3_BASE_URL`, `A2_COMMIT` y
+`A3_COMMIT`.
+
+La corrida registrada el 25/11/2026 quedó con A1 `92bf30b` (working tree), A2
+`d06bcf9` y A3 `ecba4ed`: 21 respuestas reales, escenario feliz `201`, repetición
+con la misma `idempotencyKey` devolviendo el mismo id, rechazos `409` atribuidos
+a A2 y A3, validación `400` con `campo`/`errores`/`traceId`, y la lista de
+escenarios sin cambios después de los rechazos.
 
 ### Preguntas que pide el enunciado
 
 - **OpenAPI:** vive en `/v3/api-docs` y se prueba en `/swagger-ui.html`. Incluye
   CRUD, simulación, escenario y errores 400/404/409 con descripciones y ejemplos.
-- **Grupo:** A1 es este servicio; A2 y A3 se completan con los compañeros CS2.
-  La tabla anterior registra URLs y reglas en una frase.
-- **Escenario:** necesita munición (A2) y jugador vivo (A3) para que el disparo
-  sea legal; el éxito se ve en `/escenarios` y en H2.
-- **Cliente:** las URLs y los `operationId` se configuran por propiedades o
-  variables de entorno; la ruta se lee del OpenAPI ajeno.
+- **Grupo:** A1 es este servicio, A2 es Fabricio y A3 es Joaquín. La tabla
+  anterior registra URLs y reglas en una frase.
+- **Escenario:** necesita munición (A2 `municion`) y un estado de objetivo
+  aceptado por A3 (`danio` con vida y blindaje actuales) para que el disparo sea
+  legal; el éxito se ve en `/escenarios` y en H2.
+- **Cliente:** las URLs, los `operationId` y los nombres de campos se configuran
+  por propiedades o variables de entorno; la ruta se lee del OpenAPI ajeno.
 - **Errores:** se traducen a `CompanneroRechazoException`, se propician el
   código y cuerpo remotos, y el handler distingue `A2` de `A3`.
 
@@ -114,12 +145,18 @@ mmedina-tplp3-2026/
 ├── README.md
 ├── BITACORA.md
 ├── insomnia/
+│   ├── capturar-respuestas.sh
 │   ├── cs2-insomnia.json
 │   ├── README.md
 │   └── respuestas/
+│       ├── capturas/
+│       │   ├── resumen.md
+│       │   └── *.json
 │       ├── escenario-feliz.http
 │       ├── rechazo-a2.http
-│       └── rechazo-a3.http
+│       ├── rechazo-a3.http
+│       ├── companero-no-disponible.http
+│       └── validacion-400.http
 ├── Docs/
 │   ├── diagramamermaid.md
 │   ├── ESPECIFICACIONES-POO-08.md
@@ -490,19 +527,20 @@ cd cs2
 bash ./mvnw spring-boot:run
 ```
 
-A2 y A3 son repositorios de los compañeros. Cuando se confirme el grupo,
-reemplazar estos marcadores por los enlaces reales:
+A2 es Fabricio:
 
 ```bash
-git clone <URL_REPO_A2> a2
+git clone https://github.com/FabricioG29/fg-taller-git-2026.git a2
 cd a2
-./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
+bash ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
 ```
 
+A3 es Joaquín:
+
 ```bash
-git clone <URL_REPO_A3> a3
+git clone https://github.com/joaquinBenegas0/jb-taller-git-2026.git a3
 cd a3
-./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8082
+PORT=8082 bash ./mvnw spring-boot:run
 ```
 
 Si los compañeros usan otros puertos, cambiar `A2_BASE_URL` y `A3_BASE_URL` en
@@ -546,18 +584,40 @@ Archivo: `cs2/src/main/resources/application.properties`.
 
 | Propiedad / variable | Valor por defecto | Explicación |
 |---|---|---|
-| `apis.a2.base-url` / `A2_BASE_URL` | `http://localhost:8081` | URL base de A2. |
+| `apis.a2.base-url` / `A2_BASE_URL` | `http://localhost:8081` | URL base de Fabricio (A2). |
 | `apis.a2.openapi-url` / `A2_OPENAPI_URL` | *(vacía)* | Si está vacía se deriva `/v3/api-docs`. |
-| `apis.a2.operation-id` / `A2_OPERATION_ID` | `validarMunicion` | Operación buscada en el OpenAPI de A2. |
-| `apis.a3.base-url` / `A3_BASE_URL` | `http://localhost:8082` | URL base de A3. |
+| `apis.a2.operation-id` / `A2_OPERATION_ID` | `municion` | Operación buscada en el OpenAPI de A2. |
+| `apis.a2.cuerpo.*` | `cargador`, `balasPorDisparo`, `disparos` | Nombres del JSON que espera `municion`. |
+| `apis.a3.base-url` / `A3_BASE_URL` | `http://localhost:8082` | URL base de Joaquín (A3). |
 | `apis.a3.openapi-url` / `A3_OPENAPI_URL` | *(vacía)* | Si está vacía se deriva `/v3/api-docs`. |
-| `apis.a3.operation-id` / `A3_OPERATION_ID` | `validarJugadorVivo` | Operación buscada en el OpenAPI de A3. |
+| `apis.a3.operation-id` / `A3_OPERATION_ID` | `danio` | Operación buscada en el OpenAPI de A3. |
+| `apis.a3.cuerpo.*` | `tirador`, `equipoTirador`, `objetivo`, `equipoObjetivo`, `vidaObjetivo`, `blindajeObjetivo`, `danio` | Nombres del JSON que espera `danio`. |
+| `apis.connect-timeout` / `APIS_CONNECT_TIMEOUT` | `2s` | Timeout de conexión hacia A2/A3. |
+| `apis.read-timeout` / `APIS_READ_TIMEOUT` | `5s` | Timeout de respuesta hacia A2/A3; las respuestas se leen con buffering. |
 | `springdoc.api-docs.path` | `/v3/api-docs` | Documento OpenAPI propio. |
 | `springdoc.swagger-ui.path` | `/swagger-ui.html` | Swagger UI propio. |
 
-Los nombres de los campos del JSON enviado a A2/A3 también son configurables
-con `apis.a2.request.*` y `apis.a3.request.*`, para adaptarse al cuerpo que
-publique cada compañero sin modificar Java.
+Los nombres de los campos del JSON enviado a A2/A3 son configurables con
+`apis.a2.cuerpo.*` y `apis.a3.cuerpo.*`, para adaptarse al cuerpo que publique
+cada compañero sin modificar Java. Si falta alguno de esos mapeos, el cliente
+falla rápido con un error de configuración en lugar de enviar un body incompleto.
+La URL base configurada gana sobre el `servers[0].url` del OpenAPI ajeno.
+
+### Mapa de `operationId` y payload entre A1, A2 y A3
+
+| Dirección | `operationId` | Payload que envía A1 | Aceptación |
+|---|---|---|---|
+| A1 → A2 (Fabricio) | `municion` (`A2_OPERATION_ID`) | `cargador`, `balasPorDisparo`, `disparos` | 2xx con `permitido:true`; rechazo 409/422 se atribuye a A2. |
+| A1 → A3 (Joaquín) | `danio` (`A3_OPERATION_ID`) | `tirador`, `equipoTirador`, `objetivo`, `equipoObjetivo`, `vidaObjetivo`, `blindajeObjetivo`, `danio` | 2xx con `permitido:true`; rechazo 409/422 se atribuye a A3. |
+| Compañero → A1 como A2 | `municion` en `/api/companeros/municion` | `carga`, `dano` | Alias de `validarMunicion`; 200 si hay munición, 409 si no. |
+| Compañero → A1 como A3 | `danio` en `/api/companeros/danio` | `vida`, `blindaje` | Alias de `validarJugadorVivo`; 200 si el objetivo puede recibir daño, 409 si ya murió. |
+
+Las reglas propias originales siguen disponibles en `/api/reglas/municion`
+(`operationId=validarMunicion`) y `/api/reglas/jugador-vivo`
+(`operationId=validarJugadorVivo`). Los aliases existen para que un compañero
+que configure `municion` y `danio` encuentre en A1 los mismos `operationId` que
+A1 espera de A2 y A3, sin cambiar los contratos ya probados. `GET /api/catalogo`
+publica las stats orientativas para elegir armas sin adivinar valores.
 
 ---
 
@@ -616,14 +676,17 @@ publique cada compañero sin modificar Java.
 |---|---|---|---|
 | GET | `/v3/api-docs` | Documento OpenAPI 3 de A1. | 200 |
 | GET | `/swagger-ui.html` | Swagger UI para importar/probar el contrato. | 200 |
-| POST | `/escenarios/disparo-coordinado` | Consulta A2 y A3; si ambas aceptan, dispara y persiste el escenario. | 201 / 400 / 404 / 409 |
+| GET | `/api/catalogo` | Catálogo CS2 propio con stats orientativas. | 200 |
+| POST | `/api/companeros/municion` | Alias con `operationId=municion` para compañeros. | 200 / 400 / 409 |
+| POST | `/api/companeros/danio` | Alias con `operationId=danio` para compañeros. | 200 / 400 / 409 |
+| POST | `/escenarios/disparo-coordinado` | Consulta A2 y A3; valida entrada, exige `permitido:true`, respeta `idempotencyKey` y persiste el escenario. | 201 / 400 / 404 / 409 / 502 / 504 |
 | GET | `/escenarios` | Lista los escenarios aceptados y persistidos. | 200 |
 | GET | `/escenarios/{id}` | Busca un escenario por id. | 200 / 404 |
 
 Body del escenario:
 
 ```json
-{"jugadorId":1,"armaId":1}
+{"jugadorId":1,"armaId":1,"idempotencyKey":"escenario-001"}
 ```
 
 Respuesta de rechazo de un compañero:
@@ -634,11 +697,32 @@ Respuesta de rechazo de un compañero:
   "mensaje": "Rechazo de A3 (HTTP 409)",
   "rechazadoPor": "A3",
   "statusRemoto": 409,
-  "cuerpoRemoto": "{\"excepcion\":\"JugadorEliminadoException\"}"
+   "cuerpoRemoto": "{\"excepcion\":\"JugadorEliminadoException\"}"
 }
 ```
 
+Respuesta de compañero no disponible:
+
+```json
+{
+  "excepcion": "CompaneroNoDisponibleException",
+  "mensaje": "No se pudo consultar a A2",
+  "rechazadoPor": "A2",
+  "statusHttp": 502,
+  "statusRemoto": 503,
+  "cuerpoRemoto": "upstream unavailable",
+  "traceId": "e8d3f1d0-1234-4c9a-9a2f-0de3e7f3f5b1"
+}
+```
+
+Todos los errores están tipados en Swagger con `ErrorResponse`,
+`ErrorValidacionResponse` y `ErrorCompaneroResponse`. Los de validación incluyen
+`campo` y `errores`; los de compañero incluyen `rechazadoPor`, `statusRemoto`,
+`cuerpoRemoto` y `statusHttp`; todos llevan `traceId`. Un parámetro de ruta con
+tipo inválido responde `400` en vez de `500`.
+
 ---
+
 
 ## Ejemplos con curl
 
@@ -738,10 +822,18 @@ curl http://localhost:8080/simulacion/historial/jugador/1
 ```bash
 curl -X POST http://localhost:8080/escenarios/disparo-coordinado \
   -H "Content-Type: application/json" \
-  -d '{"jugadorId":1,"armaId":1}'
+  -d '{"jugadorId":1,"armaId":1,"equipoTirador":"TERRORISTAS","equipoObjetivo":"ANTITERRORISTAS","idempotencyKey":"escenario-001"}'
 
 curl http://localhost:8080/escenarios
 curl http://localhost:8080/escenarios/1
+
+curl http://localhost:8080/api/catalogo
+curl -X POST http://localhost:8080/api/companeros/municion \
+  -H "Content-Type: application/json" \
+  -d '{"carga":1,"dano":30}'
+curl -X POST http://localhost:8080/api/companeros/danio \
+  -H "Content-Type: application/json" \
+  -d '{"vida":50,"blindaje":20}'
 ```
 
 ### Endpoint de la interfaz
@@ -878,7 +970,7 @@ cd cs2
 bash ./mvnw clean test
 ```
 
-Resultado verificado: `BUILD SUCCESS` con 55 tests, 0 fallas y 0 errores:
+Resultado verificado: `BUILD SUCCESS` con 71 tests, 0 fallas y 0 errores:
 
 - arranque del contexto Spring,
 - validaciones de `ValidadorService` sobre armas, jugadores, chalecos y recarga,
@@ -893,9 +985,19 @@ Resultado verificado: `BUILD SUCCESS` con 55 tests, 0 fallas y 0 errores:
 - cuerpo de error con el nombre de la excepción,
 - respuestas HTTP 400, 404 y 409,
 - generación del OpenAPI y presencia de paths, `operationId` y errores,
-- resolución de rutas desde un OpenAPI simulado y uso de `servers`,
-- escenario feliz y rechazos A2/A3 sin escrituras en H2,
-- endpoint HTTP del escenario con relectura y 409 con `rechazadoPor`.
+- resolución de rutas desde un OpenAPI simulado, uso de `servers` y caché con invalidación,
+- bindeo real de `apis.a2.cuerpo.*` y `apis.a3.cuerpo.*` desde `application.properties`,
+- properties de producción sin el typo `dano` y timeouts configurables,
+- cliente HTTP contra un servidor real que respeta la `base-url` configurada,
+- fail-fast de mapeos remotos y clasificación de errores 5xx como `CompaneroNoDisponibleException`,
+- escenario feliz, rechazos A2/A3 y aprobación semántica `permitido` sin escrituras en H2,
+- idempotencia por `idempotencyKey` y bloqueo optimista con `@Version`,
+- integridad referencial que impide borrar una simulación con escenario asociado,
+- endpoint HTTP del escenario con relectura, 400 de validación, 502 sin escrituras y 409 con `rechazadoPor`,
+- catálogo CS2 estable expuesto por HTTP y aliases con los `operationId` `municion` y `danio`,
+- errores tipados con `campo`/`errores`, `statusHttp`, `statusRemoto`, `cuerpoRemoto` y `traceId`,
+- parámetro de ruta mal tipado convertido en 400.
+
 
 Los tests usan `cs2/src/test/resources/application.properties` con una base H2
 en memoria para no ensuciar la base de desarrollo.
@@ -929,7 +1031,8 @@ Para importarla:
 4. Elegir el workspace **CS2 - TP LP3**.
 5. Verificar el environment **Base**:
    - `base_url` / `a1_base_url`: `http://localhost:8080`
-   - `a2_base_url` y `a3_base_url`: `http://localhost:8081` y `http://localhost:8082`.
+   - `a2_base_url` y `a3_base_url`: `http://localhost:8081` (Fabricio) y
+     `http://localhost:8082` (Joaquín).
    - `a2_openapi` y `a3_openapi`: documentos `/v3/api-docs` de los compañeros.
    - `jugador_id`, `arma_id`, `fusil_id`, `granada_id`: ids de prueba.
    - `arma_sin_municion_id`, `jugador_mortal_id`, `arma_letal_id`: ids que se
@@ -1155,7 +1258,7 @@ en `./data/cs2db`; la de tests se configura en
 - POO-08: commit exacto de cierre de observaciones
   [`4d67d6d`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/4d67d6db45af73423a9f19791ad4cb8700940213).
 - POO-09: enlace exacto al commit de la solución:
-  [commit `41ab717`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/41ab7170ecb8228dad8a493427fc24f79380a006).
+  [commit `0d93ffe`](https://github.com/MigueMedina/mmedina-tplp3-2026/commit/0d93ffe8f04f797e75ea76a3494dfc1d1190f7f6).
 
 El enlace apunta al commit inmediatamente anterior al cierre documental, siguiendo
 la convención de que un commit no puede contener su propio hash. El mismo enlace

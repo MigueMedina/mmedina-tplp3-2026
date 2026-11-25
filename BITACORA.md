@@ -27,6 +27,8 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
 - Publicación de OpenAPI con springdoc y anotaciones en controladores y DTO.
 - Clientes HTTP hacia A2 y A3 con resolución de rutas desde OpenAPI en runtime.
 - Escenario persistido con doble aprobación y rechazos atribuidos por compañero.
+- Integración de A2 con Fabricio (`municion`, puerto 8081) y A3 con Joaquín
+  (`danio`, puerto 8082), con cuerpos construidos desde el escenario local.
 
 ## Resumen de prompts relevantes
 
@@ -179,8 +181,8 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
    con `GET /api/reglas` y dos POST con los mismos `operationId` que A2 y A3,
    sin ids, repositorios ni escrituras en H2.
  - **Resultado:** `ReglasService`, `ReglasController`, DTOs con `@Schema`, rutas
-   en `ApiPaths`, pruebas unitarias y HTTP, además de `Docs/PARA-COMPANEROS.md`
-   para que el grupo pueda consultarnos al rotar.
+    en `ApiPaths`, pruebas unitarias y HTTP, además de
+    `Docs/doc-para-companeros.md` para que el grupo pueda consultarnos al rotar.
 
 ### 21. Trazabilidad y cierre documental
  - **Prompt resumido:** agregar la columna de commits exactos a las observaciones
@@ -199,11 +201,61 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
    Insomnia incluye casos felices y de error para ambas reglas, y `mvnw` pasó a
    modo `100755`.
 
+### 23. Cableado definitivo de A2 y A3
+  - **Prompt resumido:** auditar los repositorios de compañeros, usar Fabricio
+    como A2 y Joaquín como A3, adaptar los cuerpos a `municion` y `danio`, y
+    documentar arranque en 8080/8081/8082 sin hacer `git add` ni commits.
+  - **Resultado:** `ReglaRequest` pasó a llevar un mapa de valores, las claves
+    del JSON se mapean por `apis.a2.cuerpo.*` y `apis.a3.cuerpo.*`, y el
+    escenario arma `{cargador, balasPorDisparo, disparos}` para Fabricio y
+    `{tirador, equipoTirador, objetivo, equipoObjetivo, vidaObjetivo,
+    blindajeObjetivo, danio}` para Joaquín. README, documento aplicado,
+    diagramas, ficha de compañeros e Insomnia quedaron alineados con esos roles.
+
+### 24. Robustez de clientes, transacciones y validación
+  - **Prompt resumido:** reforzar fallos de configuración, distinguir rechazo de negocio de
+    indisponibilidad, sacar HTTP de la transacción, agregar idempotencia,
+    concurrencia controlada, validación de entrada y timeouts configurables.
+  - **Resultado:** se corrigió `apis.a3.cuerpo.danio` en producción, se agregó
+    fail-fast de mapeos remotos, caché OpenAPI con TTL de 5 minutos, preferencia
+    de `base-url`, `RestClient` con timeouts y buffering, aprobación semántica
+    `permitido`, `502`/`504` con `traceId` para compañeros no disponibles,
+    `400` con Bean Validation, `TransactionTemplate` con revalidación y
+    `@Version`, idempotencia por `idempotencyKey` e integridad referencial del
+    escenario. README, documento aplicado, Insomnia y sus respuestas quedaron
+    alineados.
+
+### 25. Contrato más fácil para compañeros y uso de IA
+  - **Asistente/agente:** `opencode`, ejecutado en este repositorio.
+  - **Modelo LLM exacto:** `opencode/big-pickle`.
+  - **Resumen de prompts:** comparar dos veces contra Pomona06 para detectar
+    gaps; evaluar si un compañero podría consumir A1 sin fricción; agregar
+    `GET /api/catalogo`, tipar errores 400/409/502/504, alinear `operationId` y
+    payloads, ordenar Insomnia, actualizar README/BITACORA y generar
+    `ENTREGA-POO-09.md` con marcador de commit, sin `git add` ni commits.
+  - **Resultado:** catálogo CS2 propio con 14 modelos y DTO tipado; errores
+    tipados con `campo`, `errores`, `rechazadoPor`, `statusRemoto`,
+    `cuerpoRemoto`, `statusHttp` y `traceId`; aliases `/api/companeros/municion`
+    y `/api/companeros/danio` con los `operationId` esperados; handler 400 para
+    parámetros mal tipados; Insomnia con catálogo, aliases, validación 400 y
+    respuestas claras del escenario.
+
+### 26. Captura reproducible con los tres servicios reales
+  - **Asistente/agente:** `opencode`, modelo `opencode/big-pickle`.
+  - **Resumen de prompts:** agregar una captura reproducible además de los
+    `.http`, ejecutar A1/A2/A3 reales, guardar cada pedido y respuesta con su
+    status, verificar idempotencia y rechazos, y documentar el recorrido en
+    Insomnia, README, bitácora y entrega, sin `git add` ni commits.
+  - **Resultado:** `insomnia/capturar-respuestas.sh` recorre los tres OpenAPI,
+    catálogo, aliases, reglas directas aceptadas/rechazadas, escenario feliz,
+    repetición idempotente, rechazos A2/A3, validación 400 y comparación final.
+    Genera 21 JSON y `resumen.md` en `insomnia/respuestas/capturas/`.
+
 ## Verificación de calidad
 
 
 - `cd cs2 && bash ./mvnw clean compile` → `BUILD SUCCESS`.
-- `cd cs2 && ./mvnw clean test` → `BUILD SUCCESS` con 55 tests, 0 fallas y
+- `cd cs2 && bash ./mvnw clean test -q` → `BUILD SUCCESS` con 71 tests, 0 fallas y
   0 errores.
 - Se verificaron por HTTP los 409 de munición insuficiente y jugador eliminado,
   además de la persistencia del blindaje después de una simulación.
@@ -212,7 +264,32 @@ de los prompts relevantes para la construcción y cierre del trabajo práctico.
   atribuidos a A2 y A3 sin escrituras en H2.
 - Se verificaron por HTTP las consultas stateless de las dos reglas, con casos
   200, 400 y 409, y que `GET /escenarios` no cambia después de consultarlas.
+- Se verificaron los cuerpos enviados a Fabricio y Joaquín con
+  `CompaneroClientTest` y `EscenarioIntegrationTest`.
+- Se verificó el bindeo real de `apis.a2.cuerpo.*` y `apis.a3.cuerpo.*` con
+  `Cs2ApplicationTests`, y que `application.properties` de producción usa
+  `apis.a3.cuerpo.danio` (no `dano`).
+- Se verificaron el fail-fast de mapeos, la caché con invalidación, la
+  clasificación de 5xx y un cliente HTTP real que respeta la `base-url`.
+- Se verificaron la aprobación semántica `permitido`, la idempotencia por
+  `idempotencyKey`, el bloqueo optimista con `@Version` y la integridad
+  referencial que impide borrar una simulación con escenario asociado.
+- Se verificaron por HTTP la validación `400` con `campo`, `errores` y `traceId`
+  y el `502` con `statusRemoto`, `statusHttp` y `cuerpoRemoto`, sin escrituras
+  cuando un compañero no está disponible.
+- Se verificaron `GET /api/catalogo`, los aliases con `operationId` `municion` y
+  `danio`, el error tipado para parámetros mal tipados y la presencia de los
+  esquemas en `/v3/api-docs`.
+- Se ejecutó `bash insomnia/capturar-respuestas.sh` con A1 en `8080`, Fabricio en
+  `8081` y Joaquín en `8082`: 21 respuestas reales, escenario feliz `201`,
+  repetición idempotente con el mismo id, rechazos `409` con `rechazadoPor` A2 y
+  A3, validación `400` con `campo`/`errores`/`traceId`, y lista de escenarios sin
+  cambios tras los rechazos.
+- Se actualizaron las respuestas de Insomnia con los DTO de Fabricio y Joaquín:
+  `EvaluacionMunicion`, `Aceptada`, `SIN_MUNICION`, `DISPARO_NO_PERMITIDO` y
+  `companero-no-disponible.http` con `traceId`.
 - `python3 -m json.tool insomnia/cs2-insomnia.json` → JSON válido.
+- `git diff --check` → sin errores de whitespace.
 - Prueba manual con la aplicación en ejecución:
   - `POST /jugadores` → 201 con vida 100.
   - `POST /armas/fusiles` → 201.
